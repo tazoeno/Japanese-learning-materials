@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本語学習教材</title>
+    <style>
+        body {
+            font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            line-height: 1.8;
+            margin: 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+        
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 100%;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        
+        .reading-text {
+            font-size: 16px;
+            line-height: 1.9;
+            background: #fefefe;
+            padding: 20px;
+            border-left: 4px solid #3498db;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .reading-text h2 {
+            color: #2980b9;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        .story-content {
+            display: block;
+        }
+        
+        .story-text {
+            margin-bottom: 20px;
+        }
+        
+        .illustrations {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        .emoji-illustration {
+            width: 100px;
+            height: 100px;
+            border-radius: 15px;
+            border: 3px solid #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: linear-gradient(45deg, #ffeaa7, #fab1a0);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .emoji-illustration:hover {
+            transform: scale(1.05);
+        }
+        
+        .emoji-text {
+            font-size: 8px;
+            margin-top: 5px;
+            color: #2c3e50;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .vocabulary-word {
+            color: #e74c3c;
+            font-weight: bold;
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dotted #e74c3c;
+        }
+        
+        .kanji-word {
+            color: #8e44ad;
+            font-weight: bold;
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dotted #8e44ad;
+        }
+        
+        .tooltip {
+            visibility: hidden;
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px 12px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+        
+        .reading-tooltip {
+            visibility: hidden;
+            background-color: #8e44ad;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px 12px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+        
+        .tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #2c3e50 transparent transparent transparent;
+        }
+        
+        .reading-tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #8e44ad transparent transparent transparent;
+        }
+        
+        .vocabulary-word:hover .tooltip,
+        .vocabulary-word:active .tooltip,
+        .vocabulary-word:focus .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .kanji-word:hover .reading-tooltip,
+        .kanji-word:active .reading-tooltip,
+        .kanji-word:focus .reading-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* ツールチップが重複しないようにする */
+        .vocabulary-word:not(:hover):not(:active):not(:focus) .tooltip,
+        .kanji-word:not(:hover):not(:active):not(:focus) .reading-tooltip {
+            visibility: hidden;
+            opacity: 0;
+        }
+        
+        .instructions {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #34495e;
+        }
+        
+        /* モバイル対応 */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 18px;
+            }
+            
+            .reading-text {
+                font-size: 15px;
+                padding: 15px;
+            }
+            
+            .reading-text h2 {
+                font-size: 16px;
+            }
+            
+            .emoji-illustration {
+                width: 80px;
+                height: 80px;
+                font-size: 18px;
+            }
+            
+            .tooltip, .reading-tooltip {
+                position: fixed;
+                bottom: 20px;
+                left: 10px;
+                right: 10px;
+                margin-left: 0;
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>日本語学習教材 - 5つの読み物</h1>
+        
+        <div class="instructions">
+            <strong>赤い単語</strong>をタップ（またはマウスオーバー）すると英語の意味が、<strong style="color: #8e44ad;">紫の漢字</strong>をタップすると読み仮名が表示されます。
+        </div>
+        
+        <div class="reading-text">
+            <h2>1. 謎の料理教室での出会い</h2>
+            <div class="story-content">
+                <div class="story-text">
+                    <span class="kanji-word">昨日<span class="reading-tooltip">きのう</span></span>、<span class="vocabulary-word">スポーツクラブ<span class="tooltip">sports club</span></span>の<span class="kanji-word">掲示板<span class="reading-tooltip">けいじばん</span></span>で「<span class="kanji-word">秘密<span class="reading-tooltip">ひみつ</span></span>の<span class="vocabulary-word">シチュー<span class="tooltip">stew</span></span>レシピを<span class="kanji-word">教<span class="reading-tooltip">おし</span></span>えます」という<span class="kanji-word">変<span class="reading-tooltip">か</span></span>わった<span class="kanji-word">広告<span class="reading-tooltip">こうこく</span></span>を<span class="kanji-word">見<span class="reading-tooltip">み</span></span>つけました。<span class="vocabulary-word">興味を持って<span class="tooltip">be interested in</span></span><span class="kanji-word">参加<span class="reading-tooltip">さんか</span></span>してみると、<span class="kanji-word">先生<span class="reading-tooltip">せんせい</span></span>は<span class="vocabulary-word">ニックネーム<span class="tooltip">nickname</span></span>が「<span class="kanji-word">魔法使<span class="reading-tooltip">まほうつか</span></span>い」という<span class="kanji-word">不思議<span class="reading-tooltip">ふしぎ</span></span>な<span class="kanji-word">女性<span class="reading-tooltip">じょせい</span></span>でした。<br><br>
+
+                    <span class="kanji-word">彼女<span class="reading-tooltip">かのじょ</span></span>は<span class="kanji-word">元<span class="reading-tooltip">もと</span></span><span class="vocabulary-word">専業主婦<span class="tooltip">full-time housewife</span></span>でしたが、<span class="vocabulary-word">休日<span class="tooltip">holiday / day off</span></span>に<span class="vocabulary-word">ネット<span class="tooltip">internet</span></span>で<span class="kanji-word">世界中<span class="reading-tooltip">せかいじゅう</span></span>のレシピを<span class="kanji-word">研究<span class="reading-tooltip">けんきゅう</span></span>して、<span class="kanji-word">今<span class="reading-tooltip">いま</span></span>では<span class="kanji-word">料理<span class="reading-tooltip">りょうり</span></span>の<span class="kanji-word">天才<span class="reading-tooltip">てんさい</span></span>になったそうです。<span class="vocabulary-word">将来<span class="tooltip">future</span></span>の<span class="vocabulary-word">夢<span class="tooltip">dream</span></span>は、<span class="vocabulary-word">ルーブル<span class="tooltip">Louvre art gallery</span></span><span class="kanji-word">美術館<span class="reading-tooltip">びじゅつかん</span></span>の<span class="kanji-word">前<span class="reading-tooltip">まえ</span></span>で<span class="kanji-word">料理屋台<span class="reading-tooltip">りょうりやたい</span></span>を<span class="kanji-word">開<span class="reading-tooltip">ひら</span></span>くことだと<span class="kanji-word">笑<span class="reading-tooltip">わら</span></span>いながら<span class="kanji-word">話<span class="reading-tooltip">はな</span></span>していました。<br><br>
+
+                    <span class="kanji-word">私<span class="reading-tooltip">わたし</span></span>たちは<span class="vocabulary-word">メールアドレス<span class="tooltip">e-mail address</span></span>を<span class="vocabulary-word">交換<span class="tooltip">exchange</span></span>し、<span class="kanji-word">来月<span class="reading-tooltip">らいげつ</span></span>の「<span class="kanji-word">忍者<span class="reading-tooltip">にんじゃ</span></span><span class="vocabulary-word">交流会<span class="tooltip">exchange meeting</span></span>」に<span class="kanji-word">一緒<span class="reading-tooltip">いっしょ</span></span>に<span class="vocabulary-word">参加<span class="tooltip">take part in</span></span>することになりました。<span class="kanji-word">変<span class="reading-tooltip">か</span></span>わった<span class="vocabulary-word">機会<span class="tooltip">chance / opportunity</span></span>ですが、きっと<span class="kanji-word">面白<span class="reading-tooltip">おもしろ</span></span>いでしょう。
+                </div>
+                <div class="illustrations">
+                    <div class="emoji-illustration">
+                        👩‍🍳✨🍲
+                        <div class="emoji-text">魔法の料理教室</div>
+                    </div>
+                    <div class="emoji-illustration">
+                        🏛️🍜🎪
+                        <div class="emoji-text">ルーブルで屋台</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="reading-text">
+            <h2>2. 宇宙人が来た！？おしゃべりサークル</h2>
+            <div class="story-content">
+                <div class="story-text">
+                    <span class="kanji-word">今日<span class="reading-tooltip">きょう</span></span>の<span class="vocabulary-word">おしゃべりサークル<span class="tooltip">conversation club</span></span>は<span class="kanji-word">大騒<span class="reading-tooltip">おおさわ</span></span>ぎでした。<span class="kanji-word">新<span class="reading-tooltip">あたら</span></span>しい<span class="vocabulary-word">参加者<span class="tooltip">participant</span></span>が「<span class="kanji-word">私<span class="reading-tooltip">わたし</span></span>は<span class="kanji-word">火星<span class="reading-tooltip">かせい</span></span>から<span class="kanji-word">来<span class="reading-tooltip">き</span></span>ました」と<span class="vocabulary-word">自己紹介<span class="tooltip">self introduction</span></span>したからです。みんな<span class="vocabulary-word">びっくり<span class="tooltip">surprise</span></span>しましたが、よく<span class="kanji-word">聞<span class="reading-tooltip">き</span></span>くと<span class="kanji-word">冗談<span class="reading-tooltip">じょうだん</span></span>でした。<br><br>
+
+                    その<span class="kanji-word">人<span class="reading-tooltip">ひと</span></span>は<span class="vocabulary-word">広告代理店<span class="tooltip">advertising agency</span></span>に<span class="vocabulary-word">勤める<span class="tooltip">work</span></span><span class="kanji-word">佐藤<span class="reading-tooltip">さとう</span></span>さんで、<span class="vocabulary-word">B型<span class="tooltip">blood type B</span></span>の<span class="vocabulary-word">いて座<span class="tooltip">Sagittarius</span></span>。とても<span class="vocabulary-word">社交的な<span class="tooltip">sociable</span></span><span class="vocabulary-word">性格<span class="tooltip">personality</span></span>で、<span class="vocabulary-word">定年退職<span class="tooltip">retire at mandatory retirement age</span></span><span class="kanji-word">後<span class="reading-tooltip">ご</span></span>の<span class="vocabulary-word">抱負<span class="tooltip">ambition</span></span>は<span class="kanji-word">宇宙旅行<span class="reading-tooltip">うちゅうりょこう</span></span>だそうです。<span class="vocabulary-word">週末<span class="tooltip">weekend</span></span>はUFOの<span class="vocabulary-word">スケッチ<span class="tooltip">sketch</span></span>を<span class="vocabulary-word">描いて<span class="tooltip">draw</span></span>いるそうです。<br><br>
+
+                    <span class="kanji-word">最後<span class="reading-tooltip">さいご</span></span>はみんなで<span class="kanji-word">宇宙人<span class="reading-tooltip">うちゅうじん</span></span>の<span class="kanji-word">真似<span class="reading-tooltip">まね</span></span>をしながら<span class="vocabulary-word">おしゃべり<span class="tooltip">chat</span></span>して、<span class="kanji-word">来月<span class="reading-tooltip">らいげつ</span></span>は「<span class="kanji-word">宇宙<span class="reading-tooltip">うちゅう</span></span><span class="vocabulary-word">食事会<span class="tooltip">dinner party</span></span>」を<span class="kanji-word">開<span class="reading-tooltip">ひら</span></span>くことになりました。とても<span class="kanji-word">楽<span class="reading-tooltip">たの</span></span>しい<span class="vocabulary-word">集まり<span class="tooltip">gathering</span></span>でした。
+                </div>
+                <div class="illustrations">
+                    <div class="emoji-illustration">
+                        👽🛸⭐
+                        <div class="emoji-text">火星から来た</div>
+                    </div>
+                    <div class="emoji-illustration">
+                        📝🛸🎨
+                        <div class="emoji-text">UFOスケッチ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="reading-text">
+            <h2>3. 猫カフェオーナーのTwitter炎上事件</h2>
+            <div class="story-content">
+                <div class="story-text">
+                    <span class="vocabulary-word">Twitter<span class="tooltip">Twitter</span></span>で<span class="kanji-word">話題<span class="reading-tooltip">わだい</span></span>になっている<span class="kanji-word">面白<span class="reading-tooltip">おもしろ</span></span>い<span class="vocabulary-word">プロフィール<span class="tooltip">profile</span></span>を<span class="kanji-word">見<span class="reading-tooltip">み</span></span>つけました。<span class="vocabulary-word">ロンドン<span class="tooltip">London</span></span><span class="vocabulary-word">在住<span class="tooltip">resident in</span></span>の<span class="kanji-word">猫<span class="reading-tooltip">ねこ</span></span>カフェオーナーで、20<span class="kanji-word">匹<span class="reading-tooltip">ひき</span></span>の<span class="kanji-word">猫<span class="reading-tooltip">ねこ</span></span>を<span class="vocabulary-word">飼って<span class="tooltip">keep</span></span>いる<span class="kanji-word">変<span class="reading-tooltip">か</span></span>わった<span class="vocabulary-word">主婦<span class="tooltip">housewife</span></span>です。<br><br>
+
+                    <span class="kanji-word">彼女<span class="reading-tooltip">かのじょ</span></span>の<span class="vocabulary-word">日常<span class="tooltip">everyday</span></span>は<span class="kanji-word">猫<span class="reading-tooltip">ねこ</span></span>との<span class="kanji-word">会話<span class="reading-tooltip">かいわ</span></span>を<span class="vocabulary-word">つぶやく<span class="tooltip">tweet</span></span>こと。「<span class="kanji-word">今日<span class="reading-tooltip">きょう</span></span>、タマが<span class="kanji-word">私<span class="reading-tooltip">わたし</span></span>に<span class="kanji-word">英語<span class="reading-tooltip">えいご</span></span>を<span class="kanji-word">教<span class="reading-tooltip">おし</span></span>えてくれました」などの<span class="kanji-word">面白<span class="reading-tooltip">おもしろ</span></span>い<span class="kanji-word">投稿<span class="reading-tooltip">とうこう</span></span>で、フォロワーが10<span class="kanji-word">万人<span class="reading-tooltip">まんにん</span></span>もいます。<span class="vocabulary-word">ヨーロッパ<span class="tooltip">Europe</span></span>での<span class="vocabulary-word">海外生活<span class="tooltip">life overseas</span></span>の<span class="kanji-word">大変<span class="reading-tooltip">たいへん</span></span>さを<span class="kanji-word">猫<span class="reading-tooltip">ねこ</span></span>の<span class="kanji-word">目線<span class="reading-tooltip">めせん</span></span>で<span class="kanji-word">書<span class="reading-tooltip">か</span></span>いているそうです。<br><br>
+
+                    <span class="kanji-word">最近<span class="reading-tooltip">さいきん</span></span>は「<span class="kanji-word">猫語<span class="reading-tooltip">ねこご</span></span><span class="vocabulary-word">マスター<span class="tooltip">master</span></span><span class="kanji-word">講座<span class="reading-tooltip">こうざ</span></span>」を<span class="vocabulary-word">SNS<span class="tooltip">Social Networking Service</span></span>で<span class="kanji-word">開始<span class="reading-tooltip">かいし</span></span>。<span class="kanji-word">世界中<span class="reading-tooltip">せかいじゅう</span></span>の<span class="kanji-word">猫好<span class="reading-tooltip">ねこず</span></span>きと<span class="vocabulary-word">情報交換<span class="tooltip">exchange information</span></span>しています。とても<span class="vocabulary-word">気軽に<span class="tooltip">freely</span></span><span class="kanji-word">猫<span class="reading-tooltip">ねこ</span></span>について<span class="kanji-word">話<span class="reading-tooltip">はな</span></span>せる<span class="vocabulary-word">チャンス<span class="tooltip">chance</span></span>ができて<span class="kanji-word">人気<span class="reading-tooltip">にんき</span></span>です。
+                </div>
+                <div class="illustrations">
+                    <div class="emoji-illustration">
+                        🐱☕😸
+                        <div class="emoji-text">20匹の猫カフェ</div>
+                    </div>
+                    <div class="emoji-illustration">
+                        📱🐦💬
+                        <div class="emoji-text">Twitter炎上</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="reading-text">
+            <h2>4. 忍者に転職！？サラリーマンの大冒険</h2>
+            <div class="story-content">
+                <div class="story-text">
+                    <span class="kanji-word">友人<span class="reading-tooltip">ゆうじん</span></span>の<span class="kanji-word">田中<span class="reading-tooltip">たなか</span></span>さんから<span class="kanji-word">驚<span class="reading-tooltip">おどろ</span></span>きの<span class="kanji-word">連絡<span class="reading-tooltip">れんらく</span></span>がありました。<span class="kanji-word">会社<span class="reading-tooltip">かいしゃ</span></span>の<span class="vocabulary-word">転勤<span class="tooltip">transfer</span></span><span class="kanji-word">先<span class="reading-tooltip">さき</span></span>が<span class="vocabulary-word">オーストラリア<span class="tooltip">Australia</span></span>の<span class="kanji-word">忍者<span class="reading-tooltip">にんじゃ</span></span>テーマパークだというのです。<span class="vocabulary-word">シドニー<span class="tooltip">Sydney</span></span>で<span class="kanji-word">忍者<span class="reading-tooltip">にんじゃ</span></span>ショーの<span class="kanji-word">企画<span class="reading-tooltip">きかく</span></span>をする<span class="kanji-word">仕事<span class="reading-tooltip">しごと</span></span>だそうです。<br><br>
+
+                    <span class="vocabulary-word">現在<span class="tooltip">now</span></span>は<span class="vocabulary-word">二人暮らし<span class="tooltip">two people living together</span></span>ですが、<span class="kanji-word">向<span class="reading-tooltip">む</span></span>こうでは<span class="kanji-word">忍者<span class="reading-tooltip">にんじゃ</span></span><span class="vocabulary-word">マンション<span class="tooltip">apartment</span></span>（<span class="kanji-word">屋根裏部屋付<span class="reading-tooltip">やねうらべやつ</span></span>き）に<span class="kanji-word">住<span class="reading-tooltip">す</span></span>む<span class="kanji-word">予定<span class="reading-tooltip">よてい</span></span>です。<span class="vocabulary-word">日本文化センター<span class="tooltip">Japanese culture centre</span></span>で<span class="kanji-word">本物<span class="reading-tooltip">ほんもの</span></span>の<span class="vocabulary-word">和太鼓<span class="tooltip">Japanese drum</span></span>と<span class="kanji-word">手裏剣<span class="reading-tooltip">しゅりけん</span></span>を<span class="kanji-word">習<span class="reading-tooltip">なら</span></span>うことになりました。<br><br>
+
+                    <span class="vocabulary-word">以前<span class="tooltip">before</span></span>から<span class="kanji-word">忍者<span class="reading-tooltip">にんじゃ</span></span>に<span class="vocabulary-word">関心<span class="tooltip">interest</span></span>があった<span class="kanji-word">田中<span class="reading-tooltip">たなか</span></span>さん。この<span class="kanji-word">不思議<span class="reading-tooltip">ふしぎ</span></span>な<span class="vocabulary-word">機会<span class="tooltip">opportunity</span></span>に<span class="kanji-word">忍者英語<span class="reading-tooltip">にんじゃえいご</span></span>を<span class="vocabulary-word">マスター<span class="tooltip">master</span></span>して、<span class="kanji-word">世界中<span class="reading-tooltip">せかいじゅう</span></span>の<span class="kanji-word">忍者<span class="reading-tooltip">にんじゃ</span></span>ファンと<span class="vocabulary-word">話し相手<span class="tooltip">someone to talk to</span></span>になりたいそうです。
+                </div>
+                <div class="illustrations">
+                    <div class="emoji-illustration">
+                        🥷🢐🇦🇺
+                        <div class="emoji-text">忍者テーマパーク</div>
+                    </div>
+                    <div class="emoji-illustration">
+                        🏠🥷🌃
+                        <div class="emoji-text">忍者マンション</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="reading-text">
+            <h2>5. おじいちゃんの秘密基地計画</h2>
+            <div class="story-content">
+                <div class="story-text">
+                    <span class="kanji-word">祖父<span class="reading-tooltip">そふ</span></span>が<span class="vocabulary-word">定年退職<span class="tooltip">retire at mandatory retirement age</span></span>してから1<span class="kanji-word">年<span class="reading-tooltip">ねん</span></span>。<span class="vocabulary-word">定年後<span class="tooltip">after retirement</span></span>は<span class="vocabulary-word">ゆっくり<span class="tooltip">take things easy</span></span>するつもりでしたが、とんでもない<span class="vocabulary-word">夢<span class="tooltip">dream</span></span>を<span class="kanji-word">思<span class="reading-tooltip">おも</span></span>いつきました。<span class="kanji-word">無人<span class="reading-tooltip">むじん</span></span><span class="vocabulary-word">島<span class="tooltip">island</span></span>に<span class="vocabulary-word">移住<span class="tooltip">migrate</span></span>して、<span class="kanji-word">秘密基地<span class="reading-tooltip">ひみつきち</span></span>を<span class="kanji-word">作<span class="reading-tooltip">つく</span></span>るそうです。<br><br>
+
+                    <span class="kanji-word">計画<span class="reading-tooltip">けいかく</span></span>では、<span class="vocabulary-word">温泉<span class="tooltip">hot spring</span></span>を<span class="kanji-word">掘<span class="reading-tooltip">ほ</span></span>って、<span class="vocabulary-word">日本酒<span class="tooltip">Japanese sake</span></span><span class="kanji-word">工場<span class="reading-tooltip">こうじょう</span></span>を<span class="kanji-word">作<span class="reading-tooltip">つく</span></span>り、ロボットと<span class="kanji-word">一緒<span class="reading-tooltip">いっしょ</span></span>に<span class="vocabulary-word">のんびり<span class="tooltip">slowly / in a leisurely way</span></span><span class="vocabulary-word">暮らす<span class="tooltip">live</span></span>つもりです。また、<span class="vocabulary-word">地元<span class="tooltip">local</span></span>の<span class="kanji-word">魚<span class="reading-tooltip">さかな</span></span>たちにボランティアで<span class="kanji-word">泳<span class="reading-tooltip">およ</span></span>ぎ<span class="kanji-word">方<span class="reading-tooltip">かた</span></span>を<span class="kanji-word">教<span class="reading-tooltip">おし</span></span>えたいと<span class="kanji-word">言<span class="reading-tooltip">い</span></span>っています。<br><br>
+
+                    さらに、<span class="kanji-word">一人<span class="reading-tooltip">ひとり</span></span><span class="vocabulary-word">アマチュアオーケストラ<span class="tooltip">amateur orchestra</span></span>を<span class="kanji-word">作<span class="reading-tooltip">つく</span></span>って、カニや<span class="kanji-word">鳥<span class="reading-tooltip">とり</span></span>と<span class="kanji-word">音楽<span class="reading-tooltip">おんがく</span></span>を<span class="kanji-word">通<span class="reading-tooltip">つう</span></span>じて<span class="vocabulary-word">交流<span class="tooltip">exchange</span></span>することも<span class="vocabulary-word">希望<span class="tooltip">wish / hope</span></span>しています。<span class="kanji-word">家族<span class="reading-tooltip">かぞく</span></span>みんなで「<span class="kanji-word">頑張<span class="reading-tooltip">がんば</span></span>って！」と<span class="kanji-word">応援<span class="reading-tooltip">おうえん</span></span>しています。きっと<span class="kanji-word">面白<span class="reading-tooltip">おもしろ</span></span>い<span class="vocabulary-word">経験<span class="tooltip">experience</span></span>になるでしょう。
+                </div>
+                <div class="illustrations">
+                    <div class="emoji-illustration">
+                        👴🏝️🤖
+                        <div class="emoji-text">秘密基地計画</div>
+                    </div>
+                    <div class="emoji-illustration">
+                        🎵🦀🐦
+                        <div class="emoji-text">動物オーケストラ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ツールチップの重複表示を防ぐ
+        document.addEventListener('DOMContentLoaded', function() {
+            const vocabularyWords = document.querySelectorAll('.vocabulary-word');
+            const kanjiWords = document.querySelectorAll('.kanji-word');
+            
+            function hideAllTooltips() {
+                document.querySelectorAll('.tooltip, .reading-tooltip').forEach(tooltip => {
+                    tooltip.style.visibility = 'hidden';
+                    tooltip.style.opacity = '0';
+                });
+            }
+            
+            function showTooltip(element, tooltipClass) {
+                hideAllTooltips();
+                const tooltip = element.querySelector('.' + tooltipClass);
+                if (tooltip) {
+                    tooltip.style.visibility = 'visible';
+                    tooltip.style.opacity = '1';
+                }
+            }
+            
+            // 英語翻訳ツールチップのイベント
+            vocabularyWords.forEach(word => {
+                word.addEventListener('mouseenter', () => showTooltip(word, 'tooltip'));
+                word.addEventListener('mouseleave', hideAllTooltips);
+                word.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    showTooltip(word, 'tooltip');
+                });
+            });
+            
+            // 読み仮名ツールチップのイベント
+            kanjiWords.forEach(word => {
+                word.addEventListener('mouseenter', () => showTooltip(word, 'reading-tooltip'));
+                word.addEventListener('mouseleave', hideAllTooltips);
+                word.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    showTooltip(word, 'reading-tooltip');
+                });
+            });
+            
+            // 他の場所をクリックしたらツールチップを隠す
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.vocabulary-word') && !e.target.closest('.kanji-word')) {
+                    hideAllTooltips();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

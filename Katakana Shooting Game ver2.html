@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katakana Typing Game</title>
+    <style>
+        body {
+            background-color: #ffebcd;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            color: #4b0082;
+            text-shadow: 2px 2px 4px #aaa;
+        }
+        #gameArea {
+            position: relative;
+            width: 100%;
+            height: 50vh;
+            overflow: hidden;
+            background: linear-gradient(to bottom right, #87ceeb, #ff69b4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #4b0082;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .katakana {
+            position: absolute;
+            font-size: 60px;
+            color: #fff;
+            text-shadow: 2px 2px 4px #000;
+        }
+        #hintContainer {
+            display: inline-block;
+            text-align: left;
+            margin-left: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border: 2px solid #4b0082;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        #hintLabel {
+            font-size: 24px;
+            color: #4b0082;
+        }
+        #hint {
+            font-size: 30px;
+            color: #4b0082;
+        }
+        #inputArea {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        #inputField {
+            font-size: 24px;
+            padding: 10px;
+            border: 2px solid #4b0082;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 10px;
+        }
+        #startButton {
+            font-size: 24px;
+            padding: 10px 20px;
+            margin-top: 20px;
+            cursor: pointer;
+            background-color: #4b0082;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s;
+        }
+        #startButton:hover {
+            background-color: #6a0dad;
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #4b0082;
+        }
+        #scoreMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 100px;
+            color: #ff69b4;
+            text-shadow: 2px 2px 4px #000;
+            display: none;
+        }
+        #highestScore {
+            font-size: 20px;
+            color: #4b0082;
+            margin-top: 20px;
+        }
+
+        /* Media queries for responsiveness */
+        @media (max-width: 768px) {
+            #gameArea {
+                height: 40vh;
+            }
+            .katakana {
+                font-size: 50px;
+            }
+            #hintLabel, #hint {
+                font-size: 20px;
+            }
+            #inputField {
+                font-size: 20px;
+                padding: 8px;
+            }
+            #startButton {
+                font-size: 20px;
+                padding: 8px 16px;
+            }
+            #scoreMessage {
+                font-size: 80px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #gameArea {
+                height: 30vh;
+            }
+            .katakana {
+                font-size: 40px;
+            }
+            #hintLabel, #hint {
+                font-size: 18px;
+            }
+            #inputField {
+                font-size: 18px;
+                padding: 6px;
+            }
+            #startButton {
+                font-size: 18px;
+                padding: 6px 12px;
+            }
+            #scoreMessage {
+                font-size: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Katakana Typing Game</h1>
+    <div id="gameArea">
+        <div id="katakanaChar" class="katakana"></div>
+    </div>
+    <div id="inputArea">
+        <input type="text" id="inputField" autofocus>
+        <div id="hintContainer">
+            <div id="hintLabel">HINT</div>
+            <div id="hint"></div>
+        </div>
+    </div>
+    <div id="message">Please set your typing mode to English typing.</div>
+    <div id="scoreMessage"></div>
+    <div id="highestScore">Highest Score: 0</div>
+    <button id="startButton">START</button>
+
+    <!-- Audio elements for background music and sound effects -->
+    <audio id="backgroundMusic" loop>
+        <source src="https://www.bensound.com/bensound-music/bensound-summer.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <audio id="correctSound">
+        <source src="https://www.bensound.com/bensound-music/bensound-lick.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        const katakanaToRomaji = {
+            "ア": "a", "イ": "i", "ウ": "u", "エ": "e", "オ": "o",
+            "カ": "ka", "キ": "ki", "ク": "ku", "ケ": "ke", "コ": "ko",
+            "サ": "sa", "シ": "shi", "ス": "su", "セ": "se", "ソ": "so",
+            "タ": "ta", "チ": "chi", "ツ": "tsu", "テ": "te", "ト": "to",
+            "ナ": "na", "ニ": "ni", "ヌ": "nu", "ネ": "ne", "ノ": "no",
+            "ハ": "ha", "ヒ": "hi", "フ": "fu", "ヘ": "he", "ホ": "ho",
+            "マ": "ma", "ミ": "mi", "ム": "mu", "メ": "me", "モ": "mo",
+            "ヤ": "ya", "ユ": "yu", "ヨ": "yo",
+            "ラ": "ra", "リ": "ri", "ル": "ru", "レ": "re", "ロ": "ro",
+            "ワ": "wa", "ヲ": "wo", "ン": "nn"
+        };
+        let currentChar = "";
+        let score = 0;
+        let highestScore = localStorage.getItem('highestScore') || 0;
+        let gameInterval;
+        let countdownInterval;
+        let timeLeft = 30;
+        let fallSpeed = 500; // initial fall speed in milliseconds
+
+        const katakanaElement = document.getElementById("katakanaChar");
+        const hintElement = document.getElementById("hint");
+        const inputField = document.getElementById("inputField");
+        const startButton = document.getElementById("startButton");
+        const scoreMessage = document.getElementById("scoreMessage");
+        const message = document.getElementById("message");
+        const highestScoreElement = document.getElementById("highestScore");
+        const backgroundMusic = document.getElementById("backgroundMusic");
+        const correctSound = document.getElementById("correctSound");
+
+        highestScoreElement.textContent = `Highest Score: ${highestScore}`;
+
+        function startGame() {
+            score = 0;
+            timeLeft = 30;
+            fallSpeed = 500; // reset fall speed
+            scoreMessage.style.display = "none";
+            inputField.value = "";
+            inputField.focus();
+            generateKatakana();
+            gameInterval = setInterval(fallKatakana, fallSpeed);
+            countdownInterval = setInterval(countdown, 1000);
+            backgroundMusic.play(); // Play background music
+        }
+
+        function generateKatakana() {
+            const katakanaChars = Object.keys(katakanaToRomaji);
+            currentChar = katakanaChars[Math.floor(Math.random() * katakanaChars.length)];
+            katakanaElement.textContent = currentChar;
+            hintElement.textContent = katakanaToRomaji[currentChar];
+            katakanaElement.style.top = "0px";
+            katakanaElement.style.left = Math.random() * (window.innerWidth - 60) + "px";
+        }
+
+        function fallKatakana() {
+            let top = parseInt(katakanaElement.style.top) || 0;
+            top += 5;
+            katakanaElement.style.top = top + "px";
+            if (top > window.innerHeight) {
+                generateKatakana();
+            }
+        }
+
+        function countdown() {
+            timeLeft--;
+            if (timeLeft <= 0) {
+                clearInterval(gameInterval);
+                clearInterval(countdownInterval);
+                scoreMessage.textContent = `Your score is ${score}!`;
+                scoreMessage.style.display = "block";
+                backgroundMusic.pause(); // Stop background music
+                backgroundMusic.currentTime = 0; // Reset music to start
+                if (score > highestScore) {
+                    highestScore = score;
+                    localStorage.setItem('highestScore', highestScore);
+                    highestScoreElement.textContent = `Highest Score: ${highestScore}`;
+                }
+            } else {
+                // Increase the falling speed gradually
+                fallSpeed = Math.max(100, fallSpeed - 10); // Decrease interval by 10ms, but not less than 100ms
+                clearInterval(gameInterval);
+                gameInterval = setInterval(fallKatakana, fallSpeed);
+            }
+        }
+
+        inputField.addEventListener("input", () => {
+            if (inputField.value.toLowerCase() === katakanaToRomaji[currentChar]) {
+                score++;
+                inputField.value = "";
+                generateKatakana();
+                correctSound.play(); // Play correct answer sound
+            }
+        });
+
+        startButton.addEventListener("click", startGame);
+    </script>
+</body>
+</html>

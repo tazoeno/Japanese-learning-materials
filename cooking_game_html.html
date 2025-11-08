@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本語料理ゲーム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #fed7aa, #fef3c7);
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .container {
+            max-width: 448px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #9a3412;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #ea580c;
+        }
+
+        .score-section {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .score-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .star {
+            color: #eab308;
+            width: 20px;
+            height: 20px;
+        }
+
+        .reset-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: #f3f4f6;
+            padding: 4px 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .reset-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .food-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .food-emoji {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .food-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .food-question {
+            color: #6b7280;
+        }
+
+        .methods-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .method-btn {
+            padding: 16px;
+            border-radius: 8px;
+            border: 2px solid #d1d5db;
+            background: white;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .method-btn:not(.disabled):hover {
+            border-color: #fb923c;
+            background: #fff7ed;
+        }
+
+        .method-btn:not(.disabled):active {
+            transform: scale(0.95);
+        }
+
+        .method-btn.correct {
+            background: #dcfce7;
+            border-color: #22c55e;
+            color: #166534;
+        }
+
+        .method-btn.incorrect {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+
+        .method-btn.disabled {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .method-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .method-text {
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .method-hiragana {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .method-meaning {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        .check-icon, .x-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .check-icon {
+            color: #22c55e;
+        }
+
+        .x-icon {
+            color: #ef4444;
+        }
+
+        .feedback {
+            text-align: center;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .feedback.correct {
+            background: #dcfce7;
+            color: #166534;
+            border: 2px solid #bbf7d0;
+        }
+
+        .feedback.incorrect {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #fecaca;
+        }
+
+        .feedback-detail {
+            font-size: 14px;
+            margin-top: 8px;
+            font-weight: normal;
+        }
+
+        .next-btn {
+            background: #f97316;
+            color: white;
+            padding: 12px 32px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 auto;
+            transition: background-color 0.3s;
+        }
+
+        .next-btn:hover {
+            background: #ea580c;
+        }
+
+        .instructions {
+            margin-top: 32px;
+            padding: 16px;
+            background: #eff6ff;
+            border-radius: 8px;
+            border: 1px solid #bfdbfe;
+        }
+
+        .instructions h3 {
+            font-weight: bold;
+            color: #1e40af;
+            margin-bottom: 8px;
+        }
+
+        .instructions-content {
+            font-size: 14px;
+            color: #1d4ed8;
+        }
+
+        .instructions-content div {
+            margin-bottom: 4px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🍳 料理ゲーム 🍳</h1>
+            <p>正しい調理方法を選んでね！</p>
+        </div>
+
+        <!-- Score Section -->
+        <div class="score-section">
+            <div class="score-content">
+                <div class="score-info">
+                    <svg class="star" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                    </svg>
+                    <span id="score-text">スコア: 0/0</span>
+                </div>
+                <button class="reset-btn" onclick="resetGame()">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>リセット</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Food Section -->
+        <div class="food-section">
+            <div class="food-emoji" id="food-emoji">🍔</div>
+            <h2 class="food-name" id="food-name">ハンバーグ</h2>
+            <p class="food-question">この料理はどうやって作りますか？</p>
+        </div>
+
+        <!-- Methods Grid -->
+        <div class="methods-grid" id="methods-grid">
+            <!-- Methods will be inserted here by JavaScript -->
+        </div>
+
+        <!-- Feedback -->
+        <div id="feedback" class="feedback hidden">
+            <p id="feedback-text"></p>
+            <p id="feedback-detail" class="feedback-detail"></p>
+        </div>
+
+        <!-- Next Button -->
+        <div class="text-center">
+            <button id="next-btn" class="next-btn hidden" onclick="startNewGame()">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+                </svg>
+                <span>次の問題</span>
+            </button>
+        </div>
+
+        <!-- Instructions -->
+        <div class="instructions">
+            <h3>調理方法の説明：</h3>
+            <div class="instructions-content">
+                <div><strong>焼く:</strong> フライパンやオーブンで焼く</div>
+                <div><strong>ゆでる:</strong> お湯の中で茹でる</div>
+                <div><strong>揚げる:</strong> 油の中で揚げる</div>
+                <div><strong>蒸す:</strong> 蒸気で蒸す</div>
+                <div><strong>煮る:</strong> 汁と一緒に煮込む</div>
+                <div><strong>炒める:</strong> 少ない油で炒める</div>
+                <div><strong>生のまま:</strong> 火を通さない</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const cookingMethods = [
+            { japanese: '焼く', hiragana: 'やく', meaning: 'grill/bake/fry' },
+            { japanese: 'ゆでる', hiragana: 'ゆでる', meaning: 'boil' },
+            { japanese: '揚げる', hiragana: 'あげる', meaning: 'deep fry' },
+            { japanese: '蒸す', hiragana: 'むす', meaning: 'steam' },
+            { japanese: '煮る', hiragana: 'にる', meaning: 'simmer/stew' },
+            { japanese: '炒める', hiragana: 'いためる', meaning: 'stir-fry' },
+            { japanese: '生のまま', hiragana: 'なまのまま', meaning: 'raw/fresh' }
+        ];
+
+        const foodItems = [
+            { name: 'ハンバーグ', correctMethod: '焼く', emoji: '🍖' },
+            { name: 'パスタ', correctMethod: 'ゆでる', emoji: '🍝' },
+            { name: '天ぷら', correctMethod: '揚げる', emoji: '🍤' },
+            { name: '肉まん', correctMethod: '蒸す', emoji: '🥟' },
+            { name: 'カレー', correctMethod: '煮る', emoji: '🍛' },
+            { name: '野菜炒め', correctMethod: '炒める', emoji: '🥗' },
+            { name: '寿司', correctMethod: '生のまま', emoji: '🍣' },
+            { name: 'ステーキ', correctMethod: '焼く', emoji: '🥩' },
+            { name: 'ゆで卵（boiled egg）', correctMethod: 'ゆでる', emoji: '🥚' },
+            { name: '唐揚げ（deep fried chicken, etc.）', correctMethod: '揚げる', emoji: '🍗' },
+            { name: '茶碗蒸し', correctMethod: '蒸す', emoji: '🍮' },
+            { name: 'シチュー（stew）', correctMethod: '煮る', emoji: '🥘' },
+            { name: 'チャーハン（炒飯 / fried rice）', correctMethod: '炒める', emoji: '🍚' },
+            { name: 'おでん（関東煮）', correctMethod: '煮る', emoji: '🍢' },
+            { name: 'サラダ', correctMethod: '生のまま', emoji: '🥙' }
+        ];
+
+        let currentFood = null;
+        let score = 0;
+        let gameCount = 0;
+        let showAnswer = false;
+        let selectedMethod = '';
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function startNewGame() {
+            const randomFood = foodItems[Math.floor(Math.random() * foodItems.length)];
+            currentFood = randomFood;
+            showAnswer = false;
+            selectedMethod = '';
+
+            // Update food display
+            document.getElementById('food-emoji').textContent = currentFood.emoji;
+            document.getElementById('food-name').textContent = currentFood.name;
+
+            // Hide feedback and next button
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+
+            // Create shuffled methods
+            const shuffledMethods = shuffleArray(cookingMethods);
+            createMethodButtons(shuffledMethods);
+        }
+
+        function createMethodButtons(methods) {
+            const methodsGrid = document.getElementById('methods-grid');
+            methodsGrid.innerHTML = '';
+
+            methods.forEach(method => {
+                const button = document.createElement('button');
+                button.className = 'method-btn';
+                button.onclick = () => handleMethodSelect(method);
+
+                button.innerHTML = `
+                    <div class="method-content">
+                        <div>
+                            <div class="method-text">${method.japanese}</div>
+                            <div class="method-hiragana">(${method.hiragana})</div>
+                            <div class="method-meaning">${method.meaning}</div>
+                        </div>
+                        <div id="icon-${method.japanese}"></div>
+                    </div>
+                `;
+
+                methodsGrid.appendChild(button);
+            });
+        }
+
+        function handleMethodSelect(method) {
+            if (showAnswer) return;
+
+            selectedMethod = method.japanese;
+            showAnswer = true;
+
+            const buttons = document.querySelectorAll('.method-btn');
+            buttons.forEach(btn => {
+                btn.classList.add('disabled');
+                const methodName = btn.querySelector('.method-text').textContent;
+                
+                if (methodName === currentFood.correctMethod) {
+                    btn.classList.add('correct');
+                    btn.querySelector(`[id="icon-${methodName}"]`).innerHTML = `
+                        <svg class="check-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                    `;
+                } else if (methodName === selectedMethod) {
+                    btn.classList.add('incorrect');
+                    btn.querySelector(`[id="icon-${methodName}"]`).innerHTML = `
+                        <svg class="x-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    `;
+                }
+            });
+
+            gameCount++;
+
+            if (method.japanese === currentFood.correctMethod) {
+                score++;
+                showFeedback('正解！🎉', true);
+            } else {
+                showFeedback('残念...もう一度！', false);
+            }
+
+            updateScore();
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function showFeedback(message, isCorrect) {
+            const feedback = document.getElementById('feedback');
+            const feedbackText = document.getElementById('feedback-text');
+            const feedbackDetail = document.getElementById('feedback-detail');
+
+            feedbackText.textContent = message;
+            feedbackDetail.textContent = `正解: ${currentFood.name}は「${currentFood.correctMethod}」で作ります`;
+
+            feedback.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+            feedback.classList.remove('hidden');
+        }
+
+        function updateScore() {
+            document.getElementById('score-text').textContent = `スコア: ${score}/${gameCount}`;
+        }
+
+        function resetGame() {
+            score = 0;
+            gameCount = 0;
+            updateScore();
+            startNewGame();
+        }
+
+        // Initialize game
+        startNewGame();
+    </script>
+</body>
+</html>

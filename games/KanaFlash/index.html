@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz3 Read and Type Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f8f9fa;
+            padding: 10px;
+            transition: background-color 0.5s ease; /* 背景色を滑らかに変更 */
+        }
+        #kana {
+            font-size: 5em;
+            margin: 50px 0;
+        }
+        #input-area {
+            margin-top: 20px;
+            display: none;
+        }
+        #answer {
+            font-size: 1.5em;
+            width: 80%;
+            max-width: 600px;
+            padding: 10px;
+            margin: 0 auto;
+        }
+        #feedback {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+        #correct-answer {
+            font-size: 1.2em;
+            margin-top: 10px;
+            color: #333;
+        }
+        #next-button, #start-button {
+            font-size: 1.2em;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 20px auto;
+            display: inline-block;
+        }
+        #next-button:hover, #start-button:hover {
+            background-color: #0056b3;
+        }
+        #score {
+            font-size: 6em; /* 超でかくする */
+            font-weight: bold;
+            margin-top: 50px;
+            color: #ff5722; /* 目立つ色に変更 */
+        }
+        #next-button-container, #start-button-container {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quiz3 Read and Type Game</h1>
+    <div id="kana"></div>
+    <div id="input-area">
+        <input type="text" id="answer" placeholder="type here in Hiragana/Katakana" />
+    </div>
+    <div id="feedback"></div>
+    <div id="correct-answer"></div>
+    <div id="next-button-container">
+        <button id="next-button" onclick="startNextQuestion()">Next</button>
+    </div>
+    <div id="start-button-container">
+        <button id="start-button" onclick="startGame()">Start</button>
+    </div>
+    <div id="score" style="display: none;"></div>
+
+    <script>
+        const questions = [
+            { kana: "アクション", translation: "Action" },
+            { kana: "アニメ", translation: "Anime" },
+            { kana: "いけばな", translation: "Flower arrangement" },
+            { kana: "うた", translation: "Song" },
+            { kana: "え", translation: "Picture/Drawing" },
+            { kana: "えいが", translation: "Movie" },
+            { kana: "エスエフ", translation: "SF (Science Fiction)" },
+            { kana: "おりがみ", translation: "Origami" },
+            { kana: "おんがく", translation: "Music" },
+            { kana: "がいこくご", translation: "Foreign language" },
+            { kana: "かきます", translation: "To write" },
+            { kana: "ききます", translation: "To listen/hear" },
+            { kana: "ギター", translation: "Guitar" },
+            { kana: "きゅう", translation: "Old" },
+            { kana: "クラシック", translation: "Classical" },
+            { kana: "コメディ", translation: "Comedy" },
+            { kana: "サッカー", translation: "Soccer" },
+            { kana: "さどう", translation: "Tea ceremony" },
+            { kana: "さんぽ", translation: "Walk" },
+            { kana: "ジャズ", translation: "Jazz" },
+            { kana: "じゅうどう", translation: "Judo" },
+            { kana: "しゅみ", translation: "Hobby" },
+            { kana: "しょうせつ", translation: "Novel" },
+            { kana: "スポーツ", translation: "Sports" },
+            { kana: "ぜんぜん", translation: "Not at all" },
+            { kana: "そと", translation: "Outside" },
+            { kana: "ダンス", translation: "Dance" },
+            { kana: "ときどき", translation: "Sometimes" },
+            { kana: "どくしょ", translation: "Reading" },
+            { kana: "とります", translation: "To take" },
+            { kana: "どんな", translation: "What kind of" },
+            { kana: "ねん", translation: "Year" },
+            { kana: "はいく", translation: "Haiku" },
+            { kana: "ひ", translation: "Day/Sun" },
+            { kana: "ピアノ", translation: "Piano" },
+            { kana: "ファンタジー", translation: "Fantasy" },
+            { kana: "ぶんがく", translation: "Literature" },
+            { kana: "べんきょうします", translation: "To study" },
+            { kana: "ポップス", translation: "Pop music" },
+            { kana: "ホラー", translation: "Horror" },
+            { kana: "マンガ", translation: "Manga" },
+            { kana: "ミステリー", translation: "Mystery" },
+            { kana: "みます", translation: "To watch/see" },
+            { kana: "やきゅう", translation: "Baseball" },
+            { kana: "ゆっくりします", translation: "To relax" },
+            { kana: "れんあい", translation: "Romance" },
+            { kana: "ロック", translation: "Rock music" },
+            { kana: "いくら", translation: "How much" },
+            { kana: "いっしょに", translation: "Together" },
+            { kana: "イベント", translation: "Event" },
+            { kana: "えん", translation: "Yen" },
+            { kana: "かぶき", translation: "Kabuki" },
+            { kana: "カレンダー", translation: "Calendar" },
+            { kana: "きもの", translation: "Kimono" },
+            { kana: "ざんねん", translation: "Unfortunate" },
+            { kana: "ジェイポップ", translation: "J-pop" },
+            { kana: "ジャパン", translation: "Japan" },
+            { kana: "ショー", translation: "Show" },
+            { kana: "すもう", translation: "Sumo" },
+            { kana: "たいこ", translation: "Drum" },
+            { kana: "たぶん", translation: "Maybe" },
+            { kana: "にほん", translation: "Japan" },
+            { kana: "はなび", translation: "Fireworks" },
+            { kana: "はなびたいかい", translation: "Fireworks festival" },
+            { kana: "ファッション", translation: "Fashion" },
+            { kana: "フェスティバル", translation: "Festival" },
+            { kana: "まつり", translation: "Festival" },
+            { kana: "むりょう", translation: "Free (no cost)" },
+            { kana: "もちろん", translation: "Of course" },
+            { kana: "あさくさ", translation: "Asakusa" },
+            { kana: "いいます", translation: "To say" },
+            { kana: "うえの", translation: "Ueno" },
+            { kana: "えき", translation: "Station" },
+            { kana: "おきゃくさん", translation: "Customer" },
+            { kana: "おります", translation: "To get off" },
+            { kana: "カード", translation: "Card" },
+            { kana: "くうこう", translation: "Airport" },
+            { kana: "くうしゃ", translation: "Empty car" },
+            { kana: "ぐらい", translation: "About/approximately" },
+            { kana: "じてんしゃ", translation: "Bicycle" },
+            { kana: "せんそうじ", translation: "Temple cleaning" },
+            { kana: "タクシー", translation: "Taxi" },
+            { kana: "ちかてつ", translation: "Subway" },
+            { kana: "つきます", translation: "To arrive" },
+            { kana: "でんしゃ", translation: "Train" },
+            { kana: "とうきょうタワー", translation: "Tokyo Tower" },
+            { kana: "どうやって", translation: "How to" },
+            { kana: "とおい", translation: "Far" },
+            { kana: "どちら", translation: "Which way/which one" },
+            { kana: "にもつ", translation
+: "Baggage" },
+            { kana: "のります", translation: "To ride/get on" },
+            { kana: "のりもの", translation: "Vehicle" },
+            { kana: "バイク", translation: "Motorcycle" },
+            { kana: "バス", translation: "Bus" },
+            { kana: "べんり", translation: "Convenient" },
+            { kana: "ホテル", translation: "Hotel" },
+            { kana: "まち", translation: "Town/City" },
+            { kana: "らく", translation: "Easy/Comfortable" }
+        ];
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let currentKana = [];
+        let currentKanaIndex = 0;
+        let score = 0;
+
+        function shuffleQuestions() {
+            shuffledQuestions = [...questions].sort(() => Math.random() - 0.5).slice(0, 10);
+        }
+
+        function setRandomBackgroundColor() {
+            const colors = ['#FFCDD2', '#F8BBD0', '#E1BEE7', '#D1C4E9', '#C5CAE9', '#BBDEFB', '#B3E5FC', '#B2EBF2', '#B2DFDB', '#C8E6C9'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            document.body.style.backgroundColor = randomColor;
+        }
+
+        function showKana() {
+            if (currentKanaIndex < currentKana.length) {
+                const kanaElement = document.getElementById("kana");
+                kanaElement.textContent = currentKana[currentKanaIndex];
+                currentKanaIndex++;
+                setTimeout(() => {
+                    kanaElement.textContent = "";
+                    setTimeout(showKana, 500);
+                }, 500);
+            } else {
+                document.getElementById("input-area").style.display = "block";
+                document.getElementById("answer").focus();
+            }
+        }
+
+        function startQuestion() {
+            currentKana = shuffledQuestions[currentQuestionIndex].kana.split("");
+            currentKanaIndex = 0;
+            setRandomBackgroundColor(); // 背景色を変更
+            showKana();
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById("answer").value.trim();
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const feedbackElement = document.getElementById("feedback");
+            const correctAnswerElement = document.getElementById("correct-answer");
+
+            if (userAnswer === currentQuestion.kana) {
+                feedbackElement.textContent = "Correct!";
+                feedbackElement.style.color = "green";
+                score++;
+            } else {
+                feedbackElement.textContent = "Incorrect!";
+                feedbackElement.style.color = "red";
+            }
+
+            correctAnswerElement.innerHTML = `Answer: ${currentQuestion.kana}<br>Meaning: ${currentQuestion.translation}`;
+
+            document.getElementById("input-area").style.display = "none";
+            document.getElementById("next-button").style.display = "block";
+        }
+
+        function startNextQuestion() {
+            currentQuestionIndex++;
+            document.getElementById("next-button").style.display = "none";
+            document.getElementById("feedback").textContent = "";
+            document.getElementById("correct-answer").textContent = "";
+            document.getElementById("answer").value = "";
+
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                startQuestion();
+            } else {
+                showScore();
+            }
+        }
+
+        function showScore() {
+            const scoreElement = document.getElementById("score");
+            scoreElement.textContent = `Score: ${score} / ${shuffledQuestions.length}`;
+            scoreElement.style.display = "block";
+            document.getElementById("kana").textContent = "";
+            document.getElementById("start-button").style.display = "inline-block"; // スコア画面でスタートボタンを再表示
+        }
+
+        function startGame() {
+            document.getElementById("start-button").style.display = "none";
+            shuffleQuestions();
+            setRandomBackgroundColor(); // 背景色を変更
+            startQuestion();
+        }
+
+        // Enterキーで回答を送信または次の問題に進む
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                if (document.getElementById("input-area").style.display === "block") {
+                    checkAnswer();
+                } else if (document.getElementById("next-button").style.display === "block") {
+                    startNextQuestion();
+                }
+            }
+        });
+
+        // ページのロード時に背景色をランダムに設定
+        setRandomBackgroundColor();
+    </script>
+</body>
+</html>
+

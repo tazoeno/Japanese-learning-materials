@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Katakana Catcher</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800&display=swap');
+
+    :root {
+      --bg: #0d0d2b;
+      --star-gold: #FFD700;
+      --neon-blue: #00e5ff;
+      --neon-pink: #ff4da6;
+      --neon-green: #39ff14;
+      --panel: rgba(255,255,255,0.05);
+      --text: #f0f0ff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Starfield background ── */
+    #starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .star-bg {
+      position: absolute;
+      border-radius: 50%;
+      background: white;
+      animation: twinkle linear infinite;
+    }
+    @keyframes twinkle {
+      0%,100% { opacity: 0.2; transform: scale(1); }
+      50%      { opacity: 1;   transform: scale(1.4); }
+    }
+
+    /* ── Game wrapper ── */
+    #wrap {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      height: 100vh;
+      max-height: 750px;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    /* ── Screens ── */
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 24px;
+      transition: opacity 0.4s;
+    }
+    .screen.hidden { opacity: 0; pointer-events: none; }
+
+    /* ── Instruction Screen ── */
+    #instrScreen {
+      gap: 18px;
+      background: linear-gradient(180deg, #0a0a22 0%, #12123a 100%);
+    }
+
+    .game-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.6em;
+      color: var(--neon-blue);
+      text-shadow: 0 0 20px var(--neon-blue), 0 0 40px rgba(0,229,255,0.4);
+      letter-spacing: 2px;
+      text-align: center;
+      animation: titlePulse 2.5s ease-in-out infinite;
+    }
+    .game-title span { color: var(--neon-pink); text-shadow: 0 0 20px var(--neon-pink); }
+    @keyframes titlePulse {
+      0%,100% { text-shadow: 0 0 20px var(--neon-blue), 0 0 40px rgba(0,229,255,0.3); }
+      50%      { text-shadow: 0 0 30px var(--neon-blue), 0 0 60px rgba(0,229,255,0.6); }
+    }
+
+    .subtitle {
+      font-size: 0.9em;
+      color: rgba(240,240,255,0.6);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .instr-box {
+      background: var(--panel);
+      border: 1px solid rgba(0,229,255,0.2);
+      border-radius: 18px;
+      padding: 20px 22px;
+      width: 100%;
+      backdrop-filter: blur(8px);
+    }
+    .instr-box h3 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1em;
+      color: var(--neon-blue);
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+    .rule {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      font-size: 0.92em;
+      color: var(--text);
+      line-height: 1.4;
+    }
+    .rule-icon {
+      font-size: 1.5em;
+      flex-shrink: 0;
+      width: 34px;
+      text-align: center;
+    }
+    .good  { color: var(--neon-green); }
+    .bad   { color: var(--neon-pink); }
+    .warn  { color: var(--star-gold); }
+
+    .char-demo {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin: 6px 0 4px;
+    }
+    .char-pill {
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: 1.5em;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+    .char-pill.kata { background: rgba(57,255,20,0.15); color: var(--neon-green); border: 1.5px solid var(--neon-green); }
+    .char-pill.hira { background: rgba(255,77,166,0.15); color: var(--neon-pink);  border: 1.5px solid var(--neon-pink); }
+
+    /* ── Star button ── */
+    .star-btn-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+    .star-btn {
+      width: 80px;
+      height: 80px;
+      animation: starSpin 6s linear infinite, starGlow 1.5s ease-in-out infinite alternate;
+      filter: drop-shadow(0 0 12px var(--star-gold));
+      transition: transform 0.15s;
+    }
+    .star-btn-wrap:active .star-btn { transform: scale(0.9); }
+    @keyframes starSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes starGlow {
+      from { filter: drop-shadow(0 0 8px var(--star-gold)); }
+      to   { filter: drop-shadow(0 0 24px var(--star-gold)) drop-shadow(0 0 8px #fff); }
+    }
+    .star-label {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1em;
+      color: var(--star-gold);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* ── Game Screen ── */
+    #gameScreen {
+      background: linear-gradient(180deg, #0a0a22 0%, #12123a 100%);
+      justify-content: flex-start;
+      padding: 0;
+    }
+
+    #hud {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px 6px;
+      background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(0,229,255,0.15);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .hud-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Fredoka One', cursive;
+    }
+    .hud-label { font-size: 0.65em; color: rgba(240,240,255,0.5); letter-spacing: 2px; text-transform: uppercase; }
+    .hud-val   { font-size: 1.4em; color: var(--text); }
+    #scoreVal  { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
+    #timeVal   { color: var(--neon-blue);  text-shadow: 0 0 10px var(--neon-blue); }
+    #timeVal.urgent { color: var(--neon-pink); animation: urgentBlink 0.4s ease-in-out infinite; }
+    @keyframes urgentBlink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .lives-row { display: flex; gap: 4px; font-size: 1.2em; }
+
+    #gameCanvas {
+      position: absolute;
+      top: 50px;
+      left: 0;
+      width: 100%;
+      height: calc(100% - 50px);
+      cursor: none;
+    }
+
+    /* ── Game Over Screen ── */
+    #overScreen {
+      gap: 20px;
+      background: linear-gradient(180deg, #0a0a22 0%, #12123a 100%);
+    }
+    .over-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.2em;
+      color: var(--neon-pink);
+      text-shadow: 0 0 20px var(--neon-pink);
+      animation: titlePulse 2s ease-in-out infinite;
+    }
+    .score-display {
+      background: var(--panel);
+      border: 1px solid rgba(57,255,20,0.3);
+      border-radius: 18px;
+      padding: 24px 36px;
+      text-align: center;
+    }
+    .score-display .s-label {
+      font-size: 0.85em;
+      color: rgba(240,240,255,0.5);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .score-display .s-val {
+      font-family: 'Fredoka One', cursive;
+      font-size: 3.2em;
+      color: var(--neon-green);
+      text-shadow: 0 0 20px var(--neon-green);
+    }
+    .msg {
+      font-size: 1em;
+      color: rgba(240,240,255,0.7);
+      text-align: center;
+      max-width: 280px;
+      line-height: 1.6;
+    }
+    .replay-btn {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.2em;
+      letter-spacing: 2px;
+      color: var(--bg);
+      background: linear-gradient(135deg, var(--neon-green), #00c9a7);
+      border: none;
+      border-radius: 50px;
+      padding: 14px 40px;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(57,255,20,0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .replay-btn:active { transform: scale(0.95); box-shadow: 0 0 10px rgba(57,255,20,0.2); }
+
+    /* ── Floating chars ── */
+    .char-el {
+      position: absolute;
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(1.4em, 5vw, 2em);
+      font-weight: 900;
+      user-select: none;
+      pointer-events: none;
+      filter: drop-shadow(0 0 6px currentColor);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Starfield -->
+<div id="starfield"></div>
+
+<div id="wrap">
+
+  <!-- INSTRUCTION SCREEN -->
+  <div class="screen" id="instrScreen">
+    <div class="game-title">KATAKANA<br><span>CATCHER</span></div>
+    <div class="subtitle">Japanese Learning Game</div>
+
+    <div class="instr-box">
+      <h3>📖 HOW TO PLAY</h3>
+
+      <div class="char-demo">
+        <div class="char-pill kata">ア イ ウ</div>
+        <div class="char-pill hira">あ い う</div>
+      </div>
+
+      <div class="rule">
+        <div class="rule-icon good">🧺</div>
+        <div>Move the basket left &amp; right to <strong>catch falling characters</strong></div>
+      </div>
+      <div class="rule">
+        <div class="rule-icon good">✅</div>
+        <div><span class="good"><strong>Katakana</strong></span> (アイウ…) caught → <strong class="good">+1 point</strong></div>
+      </div>
+      <div class="rule">
+        <div class="rule-icon bad">❌</div>
+        <div><span class="bad"><strong>Hiragana</strong></span> (あいう…) caught → <strong class="bad">−1 point</strong></div>
+      </div>
+      <div class="rule">
+        <div class="rule-icon warn">💥</div>
+        <div>Katakana hits the ground → <strong class="warn">1 miss</strong> (3 misses = Game Over)</div>
+      </div>
+      <div class="rule">
+        <div class="rule-icon">⏱️</div>
+        <div>You have <strong>30 seconds</strong>. Catch as many as you can!</div>
+      </div>
+      <div class="rule">
+        <div class="rule-icon">👆</div>
+        <div>On mobile: <strong>drag</strong> the basket. On desktop: use <strong>arrow keys</strong> or <strong>mouse</strong></div>
+      </div>
+    </div>
+
+    <div class="star-btn-wrap" id="starBtn">
+      <svg class="star-btn" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35"
+          fill="#FFD700" stroke="#FFA000" stroke-width="2"/>
+        <polygon points="50,20 58,42 82,42 63,55 70,78 50,65 30,78 37,55 18,42 42,42"
+          fill="#FFE566"/>
+      </svg>
+      <div class="star-label">TAP TO START ★</div>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div class="screen hidden" id="gameScreen">
+    <div id="hud">
+      <div class="hud-item">
+        <div class="hud-label">Score</div>
+        <div class="hud-val" id="scoreVal">0</div>
+      </div>
+      <div class="hud-item">
+        <div class="hud-label">Time</div>
+        <div class="hud-val" id="timeVal">30</div>
+      </div>
+      <div class="hud-item">
+        <div class="hud-label">Lives</div>
+        <div class="lives-row" id="livesRow">❤️❤️❤️</div>
+      </div>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div class="screen hidden" id="overScreen">
+    <div class="over-title" id="overTitle">TIME'S UP!</div>
+    <div class="score-display">
+      <div class="s-label">Final Score</div>
+      <div class="s-val" id="finalScore">0</div>
+    </div>
+    <div class="msg" id="overMsg">Great effort! Keep practising your Katakana!</div>
+    <button class="replay-btn" id="replayBtn">もう一度 ★ PLAY AGAIN</button>
+  </div>
+
+</div>
+
+<script>
+// ── Starfield ──────────────────────────────────────────
+const sf = document.getElementById('starfield');
+for (let i = 0; i < 120; i++) {
+  const s = document.createElement('div');
+  s.className = 'star-bg';
+  const sz = Math.random() * 2.5 + 0.5;
+  s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-duration:${2+Math.random()*4}s;animation-delay:${Math.random()*4}s`;
+  sf.appendChild(s);
+}
+
+// ── Characters ────────────────────────────────────────
+const KATA = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン'.split('');
+const HIRA = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん'.split('');
+
+// ── Audio ─────────────────────────────────────────────
+const AC = new (window.AudioContext || window.webkitAudioContext)();
+
+function playTone(freq, type='sine', dur=0.12, vol=0.3) {
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.connect(g); g.connect(AC.destination);
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + dur);
+  o.start(); o.stop(AC.currentTime + dur);
+}
+
+function sfxGood()  { playTone(880,'sine',0.1,0.3); setTimeout(()=>playTone(1200,'sine',0.1,0.3),80); }
+function sfxBad()   { playTone(200,'sawtooth',0.2,0.25); }
+function sfxMiss()  { playTone(150,'square',0.3,0.2); }
+function sfxOver()  { [300,250,200,150].forEach((f,i)=>setTimeout(()=>playTone(f,'sawtooth',0.25,0.3),i*120)); }
+
+// BGM
+let bgmNodes = [];
+function startBGM() {
+  stopBGM();
+  const notes = [261,329,392,523,392,329];
+  let t = AC.currentTime;
+  function loop() {
+    notes.forEach((f,i) => {
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.connect(g); g.connect(AC.destination);
+      o.type = 'triangle'; o.frequency.value = f;
+      g.gain.setValueAtTime(0, t + i*0.3);
+      g.gain.linearRampToValueAtTime(0.06, t + i*0.3 + 0.05);
+      g.gain.linearRampToValueAtTime(0, t + i*0.3 + 0.28);
+      o.start(t + i*0.3); o.stop(t + i*0.3 + 0.3);
+      bgmNodes.push(o);
+    });
+    t += notes.length * 0.3;
+    if (gameRunning) bgmTimer = setTimeout(loop, notes.length * 300);
+  }
+  loop();
+}
+let bgmTimer;
+function stopBGM() {
+  clearTimeout(bgmTimer);
+  bgmNodes.forEach(o => { try { o.stop(); } catch(e){} });
+  bgmNodes = [];
+}
+
+// ── Game State ────────────────────────────────────────
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let score, lives, timeLeft, chars, basket, gameRunning, animFrame, countTimer;
+let lastSpawn = 0, spawnInterval = 900;
+
+const instrScreen = document.getElementById('instrScreen');
+const gameScreen  = document.getElementById('gameScreen');
+const overScreen  = document.getElementById('overScreen');
+const scoreVal    = document.getElementById('scoreVal');
+const timeVal     = document.getElementById('timeVal');
+const livesRow    = document.getElementById('livesRow');
+const finalScore  = document.getElementById('finalScore');
+const overMsg     = document.getElementById('overMsg');
+const overTitle   = document.getElementById('overTitle');
+
+function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  canvas.width  = rect.width  || canvas.offsetWidth;
+  canvas.height = rect.height || canvas.offsetHeight;
+}
+
+function showScreen(id) {
+  [instrScreen, gameScreen, overScreen].forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function initGame() {
+  if (AC.state === 'suspended') AC.resume();
+  resizeCanvas();
+  score = 0; lives = 3; timeLeft = 30; chars = [];
+  lastSpawn = 0; spawnInterval = 900;
+  basket = { x: canvas.width / 2, w: 90, h: 28, speed: 14 };
+  updateHUD();
+  showScreen('gameScreen');
+  gameRunning = true;
+  startBGM();
+  lastTime = null;
+  animFrame = requestAnimationFrame(gameLoop);
+  countTimer = setInterval(tick, 1000);
+}
+
+function tick() {
+  timeLeft--;
+  timeVal.textContent = timeLeft;
+  timeVal.classList.toggle('urgent', timeLeft <= 5);
+  if (timeLeft <= 0) endGame(false);
+}
+
+function updateHUD() {
+  scoreVal.textContent = score;
+  timeVal.textContent  = timeLeft;
+  livesRow.innerHTML   = '❤️'.repeat(lives) + '🖤'.repeat(3 - lives);
+}
+
+// ── Char objects ─────────────────────────────────────
+function spawnChar() {
+  const isKata = Math.random() < 0.5;
+  const list   = isKata ? KATA : HIRA;
+  const ch     = list[Math.floor(Math.random() * list.length)];
+  const size   = Math.min(canvas.width * 0.1, 38);
+  chars.push({
+    ch, isKata,
+    x: size + Math.random() * (canvas.width - size * 2),
+    y: -size,
+    vy: 1.8 + Math.random() * 1.4,
+    size,
+    alpha: 1,
+    caught: false,
+    missed: false
+  });
+}
+
+// ── Drawing ───────────────────────────────────────────
+function drawBasket() {
+  const x = basket.x, y = canvas.height - 40, w = basket.w, h = basket.h;
+  // rim
+  ctx.strokeStyle = '#00e5ff';
+  ctx.lineWidth = 3;
+  ctx.shadowColor = '#00e5ff';
+  ctx.shadowBlur = 12;
+  ctx.beginPath();
+  ctx.ellipse(x, y, w/2, h/2, 0, 0, Math.PI*2);
+  ctx.stroke();
+  // weave lines
+  ctx.lineWidth = 1.5;
+  ctx.shadowBlur = 4;
+  for (let i = -2; i <= 2; i++) {
+    ctx.beginPath();
+    ctx.moveTo(x + i*(w/5), y - h/2 + 4);
+    ctx.lineTo(x + i*(w/5)*0.6, y + h/2 - 4);
+    ctx.stroke();
+  }
+  ctx.shadowBlur = 0;
+}
+
+function drawChar(c) {
+  ctx.save();
+  ctx.globalAlpha = c.alpha;
+  ctx.font = `900 ${c.size}px 'Fredoka One', cursive`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  if (c.isKata) {
+    ctx.fillStyle = '#39ff14';
+    ctx.shadowColor = '#39ff14';
+  } else {
+    ctx.fillStyle = '#ff4da6';
+    ctx.shadowColor = '#ff4da6';
+  }
+  ctx.shadowBlur = 10;
+  ctx.fillText(c.ch, c.x, c.y);
+  ctx.restore();
+}
+
+// ── Game Loop ─────────────────────────────────────────
+let lastTime = null;
+function gameLoop(ts) {
+  if (!gameRunning) return;
+  const dt = lastTime ? Math.min((ts - lastTime) / 16.67, 3) : 1;
+  lastTime = ts;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Spawn
+  if (ts - lastSpawn > spawnInterval) {
+    spawnChar();
+    lastSpawn = ts;
+    spawnInterval = Math.max(400, spawnInterval - 4);
+  }
+
+  // Move & check chars
+  for (let i = chars.length - 1; i >= 0; i--) {
+    const c = chars[i];
+    c.y += c.vy * dt;
+
+    // Collision with basket
+    const by = canvas.height - 40;
+    if (!c.caught && !c.missed &&
+        Math.abs(c.x - basket.x) < (basket.w/2 + c.size/3) &&
+        c.y + c.size/2 >= by - basket.h/2 &&
+        c.y - c.size/2 <= by + basket.h/2) {
+      c.caught = true;
+      if (c.isKata) { score++;  sfxGood(); }
+      else          { score--;  sfxBad();  }
+      if (score < 0) score = 0;
+      updateHUD();
+    }
+
+    // Missed (fell through bottom)
+    if (!c.caught && !c.missed && c.y - c.size/2 > canvas.height) {
+      c.missed = true;
+      if (c.isKata) {
+        lives--;
+        sfxMiss();
+        updateHUD();
+        if (lives <= 0) { endGame(true); return; }
+      }
+    }
+
+    // Fade out caught/missed
+    if (c.caught || c.missed) {
+      c.alpha -= 0.06 * dt;
+      if (c.alpha <= 0) { chars.splice(i, 1); continue; }
+    }
+
+    drawChar(c);
+  }
+
+  // Draw basket
+  drawBasket();
+
+  // Move basket (keyboard)
+  if (keys['ArrowLeft'])  basket.x = Math.max(basket.w/2, basket.x - basket.speed * dt);
+  if (keys['ArrowRight']) basket.x = Math.min(canvas.width - basket.w/2, basket.x + basket.speed * dt);
+
+  animFrame = requestAnimationFrame(gameLoop);
+}
+
+function endGame(died) {
+  gameRunning = false;
+  cancelAnimationFrame(animFrame);
+  clearInterval(countTimer);
+  stopBGM();
+  sfxOver();
+  overTitle.textContent  = died ? 'GAME OVER!' : "TIME'S UP!";
+  finalScore.textContent = score;
+  overMsg.textContent    = score >= 15 ? '🌟 Amazing! You\'re a Katakana pro!' :
+                           score >= 8  ? '👏 Great job! Keep practising!' :
+                                         '💪 Nice try! Can you do better?';
+  showScreen('overScreen');
+}
+
+// ── Controls ──────────────────────────────────────────
+const keys = {};
+window.addEventListener('keydown', e => { keys[e.key] = true; });
+window.addEventListener('keyup',   e => { keys[e.key] = false; });
+
+// Mouse
+canvas.addEventListener('mousemove', e => {
+  if (!gameRunning) return;
+  const r = canvas.getBoundingClientRect();
+  basket.x = Math.max(basket.w/2, Math.min(canvas.width - basket.w/2, e.clientX - r.left));
+});
+
+// Touch
+let touchX = null;
+canvas.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, {passive:true});
+canvas.addEventListener('touchmove',  e => {
+  if (!gameRunning || touchX === null) return;
+  const dx = e.touches[0].clientX - touchX;
+  touchX = e.touches[0].clientX;
+  basket.x = Math.max(basket.w/2, Math.min(canvas.width - basket.w/2, basket.x + dx));
+}, {passive:true});
+
+// ── Buttons ───────────────────────────────────────────
+document.getElementById('starBtn').addEventListener('click', initGame);
+document.getElementById('replayBtn').addEventListener('click', initGame);
+
+window.addEventListener('resize', () => { if (gameRunning) resizeCanvas(); });
+</script>
+</body>
+</html>

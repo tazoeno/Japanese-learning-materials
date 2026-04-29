@@ -184,6 +184,14 @@
       background: linear-gradient(180deg, #0a0a22 0%, #12123a 100%);
       justify-content: flex-start;
       padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    #canvasWrap {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      overflow: hidden;
     }
 
     #hud {
@@ -191,7 +199,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 16px 6px;
+      padding: 5px 16px 4px;
       background: rgba(0,0,0,0.3);
       border-bottom: 1px solid rgba(0,229,255,0.15);
       flex-shrink: 0;
@@ -203,20 +211,20 @@
       align-items: center;
       font-family: 'Fredoka One', cursive;
     }
-    .hud-label { font-size: 0.65em; color: rgba(240,240,255,0.5); letter-spacing: 2px; text-transform: uppercase; }
-    .hud-val   { font-size: 1.4em; color: var(--text); }
+    .hud-label { font-size: 0.55em; color: rgba(240,240,255,0.5); letter-spacing: 2px; text-transform: uppercase; }
+    .hud-val   { font-size: 1.1em; color: var(--text); }
     #scoreVal  { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
     #timeVal   { color: var(--neon-blue);  text-shadow: 0 0 10px var(--neon-blue); }
     #timeVal.urgent { color: var(--neon-pink); animation: urgentBlink 0.4s ease-in-out infinite; }
     @keyframes urgentBlink { 0%,100%{opacity:1} 50%{opacity:0.4} }
-    .lives-row { display: flex; gap: 4px; font-size: 1.2em; }
+    .lives-row { display: flex; gap: 3px; font-size: 1em; }
 
     #gameCanvas {
       position: absolute;
-      top: 50px;
+      top: 0;
       left: 0;
       width: 100%;
-      height: calc(100% - 50px);
+      height: 100%;
       cursor: none;
     }
 
@@ -359,7 +367,9 @@
         <div class="lives-row" id="livesRow">❤️❤️❤️</div>
       </div>
     </div>
-    <canvas id="gameCanvas"></canvas>
+    <div id="canvasWrap">
+      <canvas id="gameCanvas"></canvas>
+    </div>
   </div>
 
   <!-- GAME OVER SCREEN -->
@@ -454,9 +464,9 @@ const overMsg     = document.getElementById('overMsg');
 const overTitle   = document.getElementById('overTitle');
 
 function resizeCanvas() {
-  const rect = canvas.getBoundingClientRect();
-  canvas.width  = rect.width  || canvas.offsetWidth;
-  canvas.height = rect.height || canvas.offsetHeight;
+  const wrap = document.getElementById('canvasWrap');
+  canvas.width  = wrap.offsetWidth;
+  canvas.height = wrap.offsetHeight;
 }
 
 function showScreen(id) {
@@ -512,7 +522,7 @@ function spawnChar() {
 
 // ── Drawing ───────────────────────────────────────────
 function drawBasket() {
-  const x = basket.x, y = canvas.height - 40, w = basket.w, h = basket.h;
+  const x = basket.x, y = canvas.height - 55, w = basket.w, h = basket.h;
   // rim
   ctx.strokeStyle = '#00e5ff';
   ctx.lineWidth = 3;
@@ -573,7 +583,7 @@ function gameLoop(ts) {
     c.y += c.vy * dt;
 
     // Collision with basket
-    const by = canvas.height - 40;
+    const by = canvas.height - 55;
     if (!c.caught && !c.missed &&
         Math.abs(c.x - basket.x) < (basket.w/2 + c.size/3) &&
         c.y + c.size/2 >= by - basket.h/2 &&

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌏 Asia Mix Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 35%, #e8eaf6 65%, #e0f2f1 100%);
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+  }
+  .card {
+    background: white; border-radius: 24px; padding: 28px 24px;
+    max-width: 480px; width: 100%;
+    box-shadow: 0 8px 32px rgba(50,50,100,0.15);
+  }
+  .header { text-align: center; margin-bottom: 20px; }
+  .header .emoji { font-size: 48px; }
+  .header h1 { font-size: 22px; color: #1a1a2e; font-weight: 800; margin-top: 6px; }
+  .header .subtitle { font-size: 13px; color: #999; margin-top: 4px; }
+  .country-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .tag-jp { background: #fce4ec; color: #c62828; }
+  .tag-my { background: #e3f2fd; color: #1565c0; }
+  .tag-ph { background: #e8f5e9; color: #2e7d32; }
+  .tag-all { background: #ede7f6; color: #4527a0; }
+  .progress-bar { background: #ede7f6; border-radius: 99px; height: 8px; margin-bottom: 20px; overflow: hidden; }
+  .progress-fill { background: linear-gradient(90deg, #ff6b9d, #ffd93d, #4ecdc4, #a855f7); height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+  .q-counter { text-align: right; font-size: 12px; color: #bbb; margin-bottom: 8px; }
+  .question { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 20px; line-height: 1.5; min-height: 60px; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    background: #f8f9ff; border: 2px solid #e0e4f5; border-radius: 14px;
+    padding: 14px 16px; font-size: 15px; color: #1a1a2e;
+    cursor: pointer; transition: all 0.2s; text-align: left;
+  }
+  .option:hover { background: #ede7f6; border-color: #7b1fa2; transform: translateY(-1px); }
+  .option.correct { background: #d4f7e8; border-color: #2ecc71; color: #1a7a45; }
+  .option.wrong { background: #fde8e8; border-color: #e74c3c; color: #c0392b; }
+  .option.disabled { cursor: default; transform: none; }
+  .feedback { margin-top: 16px; padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; display: none; }
+  .feedback.show { display: block; }
+  .feedback.correct { background: #d4f7e8; color: #1a7a45; }
+  .feedback.wrong { background: #fde8e8; color: #c0392b; }
+  .next-btn {
+    margin-top: 16px; width: 100%;
+    background: linear-gradient(135deg, #ff6b9d 0%, #a855f7 50%, #4ecdc4 100%);
+    color: white; border: none; border-radius: 14px;
+    padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; display: none; transition: transform 0.15s;
+  }
+  .next-btn:hover { transform: translateY(-2px); }
+  .next-btn.show { display: block; }
+  .result { text-align: center; display: none; padding: 10px 0; }
+  .result.show { display: block; }
+  .result .big-emoji { font-size: 64px; margin-bottom: 12px; }
+  .result h2 { font-size: 24px; color: #1a1a2e; font-weight: 800; }
+  .result .score { font-size: 40px; font-weight: 900; color: #1a1a2e; margin: 10px 0; }
+  .result .msg { font-size: 15px; color: #666; margin-bottom: 20px; line-height: 1.6; }
+  .restart-btn {
+    background: linear-gradient(135deg, #ff6b9d, #a855f7);
+    color: white; border: none; border-radius: 14px;
+    padding: 14px 32px; font-size: 16px; font-weight: 700; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="emoji">🌏</div>
+    <h1>Asia Mix Quiz</h1>
+    <div class="subtitle">Japan 🇯🇵  ·  Malaysia 🇲🇾  ·  Philippines 🇵🇭</div>
+  </div>
+
+  <div class="quiz-area" id="quizArea">
+    <div class="q-counter" id="qCounter">Question 1 / 5</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div id="countryTag"></div>
+    <div class="question" id="questionText"></div>
+    <div class="options" id="optionsContainer"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next →</button>
+  </div>
+
+  <div class="result" id="result">
+    <div class="big-emoji" id="resultEmoji"></div>
+    <h2>Your Score</h2>
+    <div class="score" id="scoreText"></div>
+    <div class="msg" id="resultMsg"></div>
+    <button class="restart-btn" onclick="restartQuiz()">🔄 Try Again!</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    country: "🇯🇵 Japan",
+    tagClass: "tag-jp",
+    q: "In Japan, what do you say before eating a meal?",
+    options: ["Arigatou gozaimasu", "Itadakimasu", "Sayonara", "Ganbatte"],
+    answer: 1,
+    explanation: "Itadakimasu (いただきます) is said before eating — it means 'I humbly receive'. It's a way of showing gratitude to the food, the cook, and all living things! 🙏"
+  },
+  {
+    country: "🇲🇾 Malaysia",
+    tagClass: "tag-my",
+    q: "Malaysia is made up of two main regions. One is on the Malay Peninsula — where is the other?",
+    options: ["On the island of Java", "On the island of Borneo", "On the island of Sumatra", "On the island of Sulawesi"],
+    answer: 1,
+    explanation: "East Malaysia (Sabah and Sarawak) is on the island of Borneo — shared with Indonesia and Brunei! Borneo is home to orangutans and some of the world's most diverse rainforests. 🦧"
+  },
+  {
+    country: "🇵🇭 Philippines",
+    tagClass: "tag-ph",
+    q: "What language is most widely spoken in the Philippines?",
+    options: ["Spanish", "English and Filipino (Tagalog)", "Malay", "Japanese"],
+    answer: 1,
+    explanation: "The Philippines has two official languages: Filipino (based on Tagalog) and English! Due to Spanish colonisation, many Filipino words have Spanish roots. Over 170 regional languages are spoken across the islands! 🗣️"
+  },
+  {
+    country: "🌏 All Three!",
+    tagClass: "tag-all",
+    q: "Which of these things do Japan, Malaysia, and the Philippines all have in common?",
+    options: ["They are all island countries or have islands", "They all use the same currency", "They all have the same national language", "They all have the same official religion"],
+    answer: 0,
+    explanation: "All three countries have islands! Japan is an archipelago, Malaysia has East Malaysia on Borneo, and the Philippines has over 7,000 islands. Island life connects all three cultures! 🏝️"
+  },
+  {
+    country: "🇯🇵 Japan",
+    tagClass: "tag-jp",
+    q: "In Japanese, how do you say 'Thank you'?",
+    options: ["Sumimasen", "Konnichiwa", "Arigatou", "Ohayou"],
+    answer: 2,
+    explanation: "Arigatou (ありがとう) means 'Thank you'! The polite version is Arigatou gozaimasu (ありがとうございます). Sumimasen = excuse me, Konnichiwa = hello, Ohayou = good morning! 😊"
+  }
+];
+
+let current = 0, score = 0, answered = false;
+
+function loadQuestion() {
+  answered = false;
+  const q = questions[current];
+  document.getElementById('qCounter').textContent = `Question ${current + 1} / ${questions.length}`;
+  document.getElementById('progressFill').style.width = `${(current / questions.length) * 100}%`;
+  document.getElementById('questionText').textContent = q.q;
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('nextBtn').className = 'next-btn';
+  const tag = document.getElementById('countryTag');
+  tag.innerHTML = `<span class="country-tag ${q.tagClass}">${q.country}</span>`;
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(i);
+    container.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+  document.querySelectorAll('.option')[idx].classList.add(idx === q.answer ? 'correct' : 'wrong');
+  document.querySelectorAll('.option')[q.answer].classList.add('correct');
+  const fb = document.getElementById('feedback');
+  if (idx === q.answer) { score++; fb.className = 'feedback correct show'; fb.textContent = '✅ Correct! ' + q.explanation; }
+  else { fb.className = 'feedback wrong show'; fb.textContent = '❌ Not quite! ' + q.explanation; }
+  document.getElementById('nextBtn').className = 'next-btn show';
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) showResult();
+  else loadQuestion();
+}
+
+function showResult() {
+  document.getElementById('quizArea').style.display = 'none';
+  document.getElementById('result').className = 'result show';
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('scoreText').textContent = `${score} / ${questions.length}`;
+  const msgs = [
+    { emoji: '😢', msg: 'The more you learn about other cultures, the richer your world becomes! Keep exploring! 🌏' },
+    { emoji: '🙂', msg: 'Not bad! Asia has so many amazing cultures — keep learning! 🌺' },
+    { emoji: '😄', msg: 'Good job! You know Asia well! Have you visited any of these countries? ✈️' },
+    { emoji: '🌟', msg: 'Excellent! You are a true Asia enthusiast! ありがとう Terima kasih Salamat po! 🎉' },
+    { emoji: '🏆', msg: 'PERFECT SCORE! You are an Asia culture champion! 🇯🇵🇲🇾🇵🇭✨' },
+  ];
+  const level = score <= 1 ? 0 : score === 2 ? 1 : score === 3 ? 2 : score === 4 ? 3 : 4;
+  document.getElementById('resultEmoji').textContent = msgs[level].emoji;
+  document.getElementById('resultMsg').textContent = msgs[level].msg;
+}
+
+function restartQuiz() {
+  current = 0; score = 0;
+  document.getElementById('quizArea').style.display = 'block';
+  document.getElementById('result').className = 'result';
+  loadQuestion();
+}
+
+loadQuestion();
+</script>
+</body>
+</html>

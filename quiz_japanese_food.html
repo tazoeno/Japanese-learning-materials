@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍣 Japanese Food Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #ffe4f0 0%, #fff8fb 50%, #e8f8f5 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .card {
+    background: white;
+    border-radius: 24px;
+    padding: 28px 24px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(200,100,150,0.15);
+  }
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .header .emoji { font-size: 48px; }
+  .header h1 { font-size: 22px; color: #c41869; font-weight: 800; margin-top: 6px; }
+  .header .subtitle { font-size: 13px; color: #999; margin-top: 4px; }
+  .progress-bar {
+    background: #f5e0ea;
+    border-radius: 99px;
+    height: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    background: linear-gradient(90deg, #ff6b9d, #ffb3d1);
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+  .q-counter { text-align: right; font-size: 12px; color: #bbb; margin-bottom: 8px; }
+  .question {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c1654;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    min-height: 60px;
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    background: #fff8fb;
+    border: 2px solid #f5d6e8;
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 15px;
+    color: #2c1654;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .option:hover { background: #ffe4f0; border-color: #ff6b9d; transform: translateY(-1px); }
+  .option.correct { background: #d4f7e8; border-color: #2ecc71; color: #1a7a45; }
+  .option.wrong { background: #fde8e8; border-color: #e74c3c; color: #c0392b; }
+  .option:disabled, .option.disabled { cursor: default; transform: none; }
+  .feedback {
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct { background: #d4f7e8; color: #1a7a45; }
+  .feedback.wrong { background: #fde8e8; color: #c0392b; }
+  .next-btn {
+    margin-top: 16px;
+    width: 100%;
+    background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: none;
+    transition: transform 0.15s;
+  }
+  .next-btn:hover { transform: translateY(-2px); }
+  .next-btn.show { display: block; }
+  .result {
+    text-align: center;
+    display: none;
+    padding: 10px 0;
+  }
+  .result.show { display: block; }
+  .result .big-emoji { font-size: 64px; margin-bottom: 12px; }
+  .result h2 { font-size: 24px; color: #c41869; font-weight: 800; }
+  .result .score { font-size: 40px; font-weight: 900; color: #2c1654; margin: 10px 0; }
+  .result .msg { font-size: 15px; color: #666; margin-bottom: 20px; line-height: 1.6; }
+  .restart-btn {
+    background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 32px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .quiz-area {}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="emoji">🍣</div>
+    <h1>Japanese Food Quiz</h1>
+    <div class="subtitle">How much do you know about Japanese food?</div>
+  </div>
+
+  <div class="quiz-area" id="quizArea">
+    <div class="q-counter" id="qCounter">Question 1 / 5</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="question" id="questionText"></div>
+    <div class="options" id="optionsContainer"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next →</button>
+  </div>
+
+  <div class="result" id="result">
+    <div class="big-emoji" id="resultEmoji"></div>
+    <h2>Your Score</h2>
+    <div class="score" id="scoreText"></div>
+    <div class="msg" id="resultMsg"></div>
+    <button class="restart-btn" onclick="restartQuiz()">🔄 Try Again!</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "🍙 What is this triangular rice ball called in Japanese?",
+    options: ["Mochi", "Onigiri", "Tempura", "Gyoza"],
+    answer: 1,
+    explanation: "Onigiri (おにぎり) is a rice ball, often wrapped in seaweed and filled with salmon, tuna, or pickled plum!"
+  },
+  {
+    q: "🍜 Ramen is a popular Japanese noodle dish. Which of these is NOT a common ramen broth?",
+    options: ["Soy sauce (Shoyu)", "Miso", "Tomato", "Pork bone (Tonkotsu)"],
+    answer: 2,
+    explanation: "Tomato is not a traditional ramen broth! The classic types are shoyu, miso, tonkotsu, and shio (salt)."
+  },
+  {
+    q: "🍱 What is a 'bento'?",
+    options: ["A type of sushi", "A packed meal in a box", "A Japanese dessert", "A cooking style"],
+    answer: 1,
+    explanation: "Bento (弁当) is a single-portion packed meal, usually with rice, protein, and vegetables. Many Japanese people bring homemade bento to school!"
+  },
+  {
+    q: "🌸 Sakura mochi is a sweet rice cake associated with which season?",
+    options: ["Summer", "Autumn", "Winter", "Spring"],
+    answer: 3,
+    explanation: "Sakura mochi (桜餅) is eaten in spring during cherry blossom season. It's a pink rice cake wrapped in a pickled cherry leaf!"
+  },
+  {
+    q: "🍡 Takoyaki is a popular street food. What is its main ingredient?",
+    options: ["Shrimp", "Octopus", "Squid", "Crab"],
+    answer: 1,
+    explanation: "Takoyaki (たこ焼き) means 'octopus balls'! Tako = octopus. They're crispy outside, gooey inside, and topped with sauce and bonito flakes. 🐙"
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+  answered = false;
+  const q = questions[current];
+  document.getElementById('qCounter').textContent = `Question ${current + 1} / ${questions.length}`;
+  document.getElementById('progressFill').style.width = `${(current / questions.length) * 100}%`;
+  document.getElementById('questionText').textContent = q.q;
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('nextBtn').className = 'next-btn';
+
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(i);
+    container.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const options = document.querySelectorAll('.option');
+  options.forEach(o => o.classList.add('disabled'));
+  options[idx].classList.add(idx === q.answer ? 'correct' : 'wrong');
+  options[q.answer].classList.add('correct');
+
+  const fb = document.getElementById('feedback');
+  if (idx === q.answer) {
+    score++;
+    fb.className = 'feedback correct show';
+    fb.textContent = '✅ Correct! ' + q.explanation;
+  } else {
+    fb.className = 'feedback wrong show';
+    fb.textContent = '❌ Not quite! ' + q.explanation;
+  }
+  document.getElementById('nextBtn').className = 'next-btn show';
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) {
+    showResult();
+  } else {
+    loadQuestion();
+  }
+}
+
+function showResult() {
+  document.getElementById('quizArea').style.display = 'none';
+  const result = document.getElementById('result');
+  result.className = 'result show';
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('scoreText').textContent = `${score} / ${questions.length}`;
+
+  const msgs = [
+    { emoji: '😢', msg: "Don't give up! Japanese food is delicious — try some and learn more! 🍱" },
+    { emoji: '🙂', msg: "Not bad! You know a few Japanese dishes. Time to try more! 🍣" },
+    { emoji: '😄', msg: "Good job! You know your Japanese food well! 🎌" },
+    { emoji: '🌟', msg: "Amazing! You're a Japanese food expert! Maybe you should open a restaurant! 🍜✨" },
+    { emoji: '🏆', msg: "PERFECT! Incredible! You know everything about Japanese food! いただきます！🎊" },
+  ];
+  const level = score <= 1 ? 0 : score === 2 ? 1 : score === 3 ? 2 : score === 4 ? 3 : 4;
+  document.getElementById('resultEmoji').textContent = msgs[level].emoji;
+  document.getElementById('resultMsg').textContent = msgs[level].msg;
+}
+
+function restartQuiz() {
+  current = 0; score = 0;
+  document.getElementById('quizArea').style.display = 'block';
+  document.getElementById('result').className = 'result';
+  loadQuestion();
+}
+
+loadQuestion();
+</script>
+</body>
+</html>

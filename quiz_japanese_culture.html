@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎌 Japanese Culture Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #fce4ec 0%, #f8f8ff 50%, #e8eaf6 100%);
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+  }
+  .card {
+    background: white; border-radius: 24px; padding: 28px 24px;
+    max-width: 480px; width: 100%;
+    box-shadow: 0 8px 32px rgba(100,50,150,0.15);
+  }
+  .header { text-align: center; margin-bottom: 20px; }
+  .header .emoji { font-size: 48px; }
+  .header h1 { font-size: 22px; color: #4a0080; font-weight: 800; margin-top: 6px; }
+  .header .subtitle { font-size: 13px; color: #999; margin-top: 4px; }
+  .progress-bar { background: #ede7f6; border-radius: 99px; height: 8px; margin-bottom: 20px; overflow: hidden; }
+  .progress-fill { background: linear-gradient(90deg, #7b1fa2, #ce93d8); height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+  .q-counter { text-align: right; font-size: 12px; color: #bbb; margin-bottom: 8px; }
+  .question { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 20px; line-height: 1.5; min-height: 60px; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    background: #f3e5f5; border: 2px solid #e1bee7; border-radius: 14px;
+    padding: 14px 16px; font-size: 15px; color: #1a1a2e;
+    cursor: pointer; transition: all 0.2s; text-align: left;
+  }
+  .option:hover { background: #e1bee7; border-color: #7b1fa2; transform: translateY(-1px); }
+  .option.correct { background: #d4f7e8; border-color: #2ecc71; color: #1a7a45; }
+  .option.wrong { background: #fde8e8; border-color: #e74c3c; color: #c0392b; }
+  .option.disabled { cursor: default; transform: none; }
+  .feedback { margin-top: 16px; padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; display: none; }
+  .feedback.show { display: block; }
+  .feedback.correct { background: #d4f7e8; color: #1a7a45; }
+  .feedback.wrong { background: #fde8e8; color: #c0392b; }
+  .next-btn {
+    margin-top: 16px; width: 100%;
+    background: linear-gradient(135deg, #7b1fa2, #9c27b0);
+    color: white; border: none; border-radius: 14px;
+    padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; display: none; transition: transform 0.15s;
+  }
+  .next-btn:hover { transform: translateY(-2px); }
+  .next-btn.show { display: block; }
+  .result { text-align: center; display: none; padding: 10px 0; }
+  .result.show { display: block; }
+  .result .big-emoji { font-size: 64px; margin-bottom: 12px; }
+  .result h2 { font-size: 24px; color: #7b1fa2; font-weight: 800; }
+  .result .score { font-size: 40px; font-weight: 900; color: #1a1a2e; margin: 10px 0; }
+  .result .msg { font-size: 15px; color: #666; margin-bottom: 20px; line-height: 1.6; }
+  .restart-btn { background: linear-gradient(135deg, #7b1fa2, #9c27b0); color: white; border: none; border-radius: 14px; padding: 14px 32px; font-size: 16px; font-weight: 700; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="emoji">🎌</div>
+    <h1>Japanese Culture Quiz</h1>
+    <div class="subtitle">Traditions, festivals, and everyday life in Japan!</div>
+  </div>
+
+  <div class="quiz-area" id="quizArea">
+    <div class="q-counter" id="qCounter">Question 1 / 5</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="question" id="questionText"></div>
+    <div class="options" id="optionsContainer"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next →</button>
+  </div>
+
+  <div class="result" id="result">
+    <div class="big-emoji" id="resultEmoji"></div>
+    <h2>Your Score</h2>
+    <div class="score" id="scoreText"></div>
+    <div class="msg" id="resultMsg"></div>
+    <button class="restart-btn" onclick="restartQuiz()">🔄 Try Again!</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "🌸 Hanami is a popular Japanese spring activity. What does it involve?",
+    options: ["Watching fireworks at night", "Viewing cherry blossoms and having picnics", "Flying kites on the beach", "Hiking up mountains"],
+    answer: 1,
+    explanation: "Hanami (花見) means 'flower viewing'! People gather under cherry blossom trees for picnics with food, drinks and friends. It only lasts about 1-2 weeks each spring — very precious! 🌸"
+  },
+  {
+    q: "👘 What is the traditional Japanese garment called, worn at festivals and special occasions?",
+    options: ["Hanbok", "Kimono", "Ao Dai", "Yukata"],
+    answer: 1,
+    explanation: "A kimono (着物) is a traditional Japanese robe. Yukata is a lighter, casual version worn at summer festivals. Hanbok is Korean, and Ao Dai is Vietnamese! 👘"
+  },
+  {
+    q: "🏯 What is a 'samurai'?",
+    options: ["A Japanese chef specialising in sushi", "A warrior class in feudal Japan", "A type of Japanese garden", "A traditional Japanese instrument"],
+    answer: 1,
+    explanation: "Samurai (侍) were a warrior class in feudal Japan who followed a strict code of honour called Bushido (武士道), meaning 'way of the warrior'. They are a huge part of Japanese history and pop culture! ⚔️"
+  },
+  {
+    q: "🎆 Obon is an important Japanese summer festival. What is its purpose?",
+    options: ["Celebrating the harvest of rice", "Honouring the spirits of ancestors", "Welcoming the New Year", "Celebrating the Emperor's birthday"],
+    answer: 1,
+    explanation: "Obon (お盆) is a Buddhist festival to honour the spirits of ancestors who return to visit their living relatives. Families clean graves and often perform traditional Bon Odori dances! 👻💃"
+  },
+  {
+    q: "🗻 Mount Fuji is Japan's highest mountain. How tall is it?",
+    options: ["2,776 m", "3,776 m", "4,776 m", "1,776 m"],
+    answer: 1,
+    explanation: "Mount Fuji (富士山) is 3,776 metres tall — the highest peak in Japan! It is an active stratovolcano and a UNESCO World Heritage site. About 200,000 people climb it every year! 🏔️"
+  }
+];
+
+let current = 0, score = 0, answered = false;
+
+function loadQuestion() {
+  answered = false;
+  const q = questions[current];
+  document.getElementById('qCounter').textContent = `Question ${current + 1} / ${questions.length}`;
+  document.getElementById('progressFill').style.width = `${(current / questions.length) * 100}%`;
+  document.getElementById('questionText').textContent = q.q;
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('nextBtn').className = 'next-btn';
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(i);
+    container.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+  document.querySelectorAll('.option')[idx].classList.add(idx === q.answer ? 'correct' : 'wrong');
+  document.querySelectorAll('.option')[q.answer].classList.add('correct');
+  const fb = document.getElementById('feedback');
+  if (idx === q.answer) { score++; fb.className = 'feedback correct show'; fb.textContent = '✅ Correct! ' + q.explanation; }
+  else { fb.className = 'feedback wrong show'; fb.textContent = '❌ Not quite! ' + q.explanation; }
+  document.getElementById('nextBtn').className = 'next-btn show';
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) showResult();
+  else loadQuestion();
+}
+
+function showResult() {
+  document.getElementById('quizArea').style.display = 'none';
+  document.getElementById('result').className = 'result show';
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('scoreText').textContent = `${score} / ${questions.length}`;
+  const msgs = [
+    { emoji: '😢', msg: 'There is so much to learn about Japan! Start with watching anime! 🎌' },
+    { emoji: '🙂', msg: 'Good start! Japan has thousands of years of fascinating culture! 🏯' },
+    { emoji: '😄', msg: 'Nice work! You know your Japanese culture well! 🌸' },
+    { emoji: '🌟', msg: 'Excellent! Have you ever been to Japan? You clearly love it! 🗻' },
+    { emoji: '🏆', msg: 'PERFECT SCORE! You are an honorary Japanese culture expert! よくできました！🎊' },
+  ];
+  const level = score <= 1 ? 0 : score === 2 ? 1 : score === 3 ? 2 : score === 4 ? 3 : 4;
+  document.getElementById('resultEmoji').textContent = msgs[level].emoji;
+  document.getElementById('resultMsg').textContent = msgs[level].msg;
+}
+
+function restartQuiz() {
+  current = 0; score = 0;
+  document.getElementById('quizArea').style.display = 'block';
+  document.getElementById('result').className = 'result';
+  loadQuestion();
+}
+
+loadQuestion();
+</script>
+</body>
+</html>

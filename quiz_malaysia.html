@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🇲🇾 Malaysia Culture Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #fff3e0 0%, #fffdf5 50%, #e8f5e9 100%);
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+  }
+  .card {
+    background: white; border-radius: 24px; padding: 28px 24px;
+    max-width: 480px; width: 100%;
+    box-shadow: 0 8px 32px rgba(0,100,200,0.12);
+  }
+  .header { text-align: center; margin-bottom: 20px; }
+  .header .emoji { font-size: 48px; }
+  .header h1 { font-size: 22px; color: #cc0001; font-weight: 800; margin-top: 6px; }
+  .header .subtitle { font-size: 13px; color: #999; margin-top: 4px; }
+  .progress-bar { background: #fce4ec; border-radius: 99px; height: 8px; margin-bottom: 20px; overflow: hidden; }
+  .progress-fill { background: linear-gradient(90deg, #cc0001, #f48fb1); height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+  .q-counter { text-align: right; font-size: 12px; color: #bbb; margin-bottom: 8px; }
+  .question { font-size: 18px; font-weight: 700; color: #1a237e; margin-bottom: 20px; line-height: 1.5; min-height: 60px; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    background: #fffde7; border: 2px solid #ffe082; border-radius: 14px;
+    padding: 14px 16px; font-size: 15px; color: #1a237e;
+    cursor: pointer; transition: all 0.2s; text-align: left;
+  }
+  .option:hover { background: #fff9c4; border-color: #ffc107; transform: translateY(-1px); }
+  .option.correct { background: #d4f7e8; border-color: #2ecc71; color: #1a7a45; }
+  .option.wrong { background: #fde8e8; border-color: #e74c3c; color: #c0392b; }
+  .option.disabled { cursor: default; transform: none; }
+  .feedback { margin-top: 16px; padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; display: none; }
+  .feedback.show { display: block; }
+  .feedback.correct { background: #d4f7e8; color: #1a7a45; }
+  .feedback.wrong { background: #fde8e8; color: #c0392b; }
+  .next-btn {
+    margin-top: 16px; width: 100%;
+    background: linear-gradient(135deg, #cc0001, #e53935);
+    color: white; border: none; border-radius: 14px;
+    padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; display: none; transition: transform 0.15s;
+  }
+  .next-btn:hover { transform: translateY(-2px); }
+  .next-btn.show { display: block; }
+  .result { text-align: center; display: none; padding: 10px 0; }
+  .result.show { display: block; }
+  .result .big-emoji { font-size: 64px; margin-bottom: 12px; }
+  .result h2 { font-size: 24px; color: #cc0001; font-weight: 800; }
+  .result .score { font-size: 40px; font-weight: 900; color: #1a237e; margin: 10px 0; }
+  .result .msg { font-size: 15px; color: #666; margin-bottom: 20px; line-height: 1.6; }
+  .restart-btn { background: linear-gradient(135deg, #cc0001, #e53935); color: white; border: none; border-radius: 14px; padding: 14px 32px; font-size: 16px; font-weight: 700; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="emoji">🇲🇾</div>
+    <h1>Malaysia Culture Quiz</h1>
+    <div class="subtitle">Discover the amazing culture of Malaysia!</div>
+  </div>
+
+  <div class="quiz-area" id="quizArea">
+    <div class="q-counter" id="qCounter">Question 1 / 5</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="question" id="questionText"></div>
+    <div class="options" id="optionsContainer"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next →</button>
+  </div>
+
+  <div class="result" id="result">
+    <div class="big-emoji" id="resultEmoji"></div>
+    <h2>Your Score</h2>
+    <div class="score" id="scoreText"></div>
+    <div class="msg" id="resultMsg"></div>
+    <button class="restart-btn" onclick="restartQuiz()">🔄 Try Again!</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "🌆 What is the capital city of Malaysia?",
+    options: ["Penang", "Johor Bahru", "Kuala Lumpur", "Kota Kinabalu"],
+    answer: 2,
+    explanation: "Kuala Lumpur (KL) is the capital city of Malaysia! It's famous for the Petronas Twin Towers, which were once the tallest buildings in the world!"
+  },
+  {
+    q: "🍛 Nasi lemak is considered Malaysia's national dish. What does 'nasi lemak' mean?",
+    options: ["Spicy rice", "Fried rice", "Rich/creamy rice", "Yellow rice"],
+    answer: 2,
+    explanation: "Nasi lemak means 'rich' or 'creamy rice'! It's rice cooked in coconut milk, served with sambal, anchovies, peanuts, egg, and cucumber. Delicious! 🌶️"
+  },
+  {
+    q: "🏙️ The Petronas Twin Towers are located in Kuala Lumpur. How many floors does each tower have?",
+    options: ["68 floors", "78 floors", "88 floors", "98 floors"],
+    answer: 2,
+    explanation: "Each Petronas Tower has 88 floors! The number 88 is considered lucky in Chinese culture. They were completed in 1998 and stand 452 meters tall! 🏗️"
+  },
+  {
+    q: "🌴 Malaysia is known for its amazing rainforests. How old is the Taman Negara rainforest?",
+    options: ["10 million years", "50 million years", "130 million years", "200 million years"],
+    answer: 2,
+    explanation: "Taman Negara is one of the world's oldest rainforests at 130 million years old — older than the Amazon! It's home to tigers, elephants, and thousands of species. 🐯"
+  },
+  {
+    q: "🎨 Batik is a traditional Malaysian fabric art. How is the pattern made?",
+    options: ["Weaving threads together", "Using wax to resist dye", "Sewing colourful patches", "Printing with wooden blocks only"],
+    answer: 1,
+    explanation: "Batik uses hot wax to block out areas of fabric before dyeing. The wax is then removed to reveal beautiful patterns! Malaysian batik is famous for its bright colours and floral designs. 🌸"
+  }
+];
+
+let current = 0, score = 0, answered = false;
+
+function loadQuestion() {
+  answered = false;
+  const q = questions[current];
+  document.getElementById('qCounter').textContent = `Question ${current + 1} / ${questions.length}`;
+  document.getElementById('progressFill').style.width = `${(current / questions.length) * 100}%`;
+  document.getElementById('questionText').textContent = q.q;
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('nextBtn').className = 'next-btn';
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(i);
+    container.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+  document.querySelectorAll('.option')[idx].classList.add(idx === q.answer ? 'correct' : 'wrong');
+  document.querySelectorAll('.option')[q.answer].classList.add('correct');
+  const fb = document.getElementById('feedback');
+  if (idx === q.answer) { score++; fb.className = 'feedback correct show'; fb.textContent = '✅ Correct! ' + q.explanation; }
+  else { fb.className = 'feedback wrong show'; fb.textContent = '❌ Not quite! ' + q.explanation; }
+  document.getElementById('nextBtn').className = 'next-btn show';
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) showResult();
+  else loadQuestion();
+}
+
+function showResult() {
+  document.getElementById('quizArea').style.display = 'none';
+  document.getElementById('result').className = 'result show';
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('scoreText').textContent = `${score} / ${questions.length}`;
+  const msgs = [
+    { emoji: '😢', msg: 'Malaysia has so much to discover! Visit KL someday! 🌆' },
+    { emoji: '🙂', msg: 'Good start! Malaysia is a beautiful country with amazing food! 🍛' },
+    { emoji: '😄', msg: 'Nice work! You know Malaysia pretty well! 🌴' },
+    { emoji: '🌟', msg: 'Excellent! You really know Malaysia! Have you been there? ✈️' },
+    { emoji: '🏆', msg: 'PERFECT SCORE! You could be a Malaysian tourism ambassador! 🇲🇾✨' },
+  ];
+  const level = score <= 1 ? 0 : score === 2 ? 1 : score === 3 ? 2 : score === 4 ? 3 : 4;
+  document.getElementById('resultEmoji').textContent = msgs[level].emoji;
+  document.getElementById('resultMsg').textContent = msgs[level].msg;
+}
+
+function restartQuiz() {
+  current = 0; score = 0;
+  document.getElementById('quizArea').style.display = 'block';
+  document.getElementById('result').className = 'result';
+  loadQuestion();
+}
+
+loadQuestion();
+</script>
+</body>
+</html>

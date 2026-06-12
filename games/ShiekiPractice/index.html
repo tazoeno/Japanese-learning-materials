@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>使役・使役受身 クイック練習</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --ink:#23304a; --sub:#6b7790;
+    --accent:#4f6df5; --accent2:#7c4ff5; --ok:#1fa97a; --ng:#e05566;
+    --gold:#f5a623; --radius:16px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif;
+    font-size:17px; line-height:1.7;
+  }
+  .wrap{max-width:520px; margin:0 auto; padding:16px 16px 48px;}
+  header{
+    background:linear-gradient(120deg,var(--accent),var(--accent2));
+    color:#fff; border-radius:var(--radius); padding:18px 20px; margin-bottom:16px;
+  }
+  header h1{font-size:1.2rem; margin:0 0 4px;}
+  header p{margin:0; font-size:.85rem; opacity:.9;}
+  .card{
+    background:var(--card); border-radius:var(--radius);
+    padding:20px; box-shadow:0 2px 10px rgba(35,48,74,.07); margin-bottom:14px;
+  }
+  .hidden{display:none !important;}
+  button{
+    font-family:inherit; font-size:1rem; border:none; border-radius:12px;
+    cursor:pointer; padding:14px 18px; width:100%;
+  }
+  .btn-main{
+    background:linear-gradient(120deg,var(--accent),var(--accent2));
+    color:#fff; font-weight:700; font-size:1.05rem;
+  }
+  .btn-main:active{transform:scale(.98);}
+  .btn-sub{background:#e8ecf7; color:var(--ink); font-weight:600;}
+  input[type=text]{
+    width:100%; font-family:inherit; font-size:1.05rem; padding:13px 14px;
+    border:2px solid #d6dcec; border-radius:12px; outline:none; background:#fff;
+  }
+  input[type=text]:focus{border-color:var(--accent);}
+  /* progress + status bar */
+  .statusbar{display:flex; justify-content:space-between; align-items:center;
+    font-size:.85rem; color:var(--sub); margin-bottom:8px; font-weight:600;}
+  .statusbar .pts{color:var(--accent); font-size:1rem;}
+  .statusbar .streak{color:var(--gold);}
+  .pbar{height:8px; background:#e3e8f4; border-radius:99px; overflow:hidden; margin-bottom:16px;}
+  .pbar>div{height:100%; width:0%;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    border-radius:99px; transition:width .3s;}
+  /* question */
+  .scene{
+    display:inline-block; background:#eef1fd; color:var(--accent);
+    font-size:.8rem; font-weight:700; padding:3px 12px; border-radius:99px; margin-bottom:10px;
+  }
+  .qtext{font-size:1.1rem; margin-bottom:16px;}
+  .qtext .blank{
+    display:inline-block; min-width:90px; border-bottom:3px solid var(--accent);
+    text-align:center; color:var(--accent); font-weight:700;
+  }
+  ruby rt{font-size:.55em; color:var(--sub);}
+  .opts{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    background:#f2f4fb; text-align:left; font-size:1.05rem; padding:14px 16px;
+    border:2px solid transparent; border-radius:12px; transition:background .15s;
+  }
+  .opt:active{background:#e6eafa;}
+  .opt.correct{background:#e3f6ee; border-color:var(--ok); color:var(--ok); font-weight:700;}
+  .opt.wrong{background:#fdeaec; border-color:var(--ng); color:var(--ng);}
+  .opt:disabled{opacity:.92;}
+  .hint{font-size:.85rem; color:var(--sub); margin-bottom:10px;}
+  .inputrow{display:flex; gap:8px;}
+  .inputrow button{width:auto; flex:0 0 auto; padding:13px 20px;}
+  /* feedback */
+  .fb{margin-top:14px; padding:13px 15px; border-radius:12px; font-size:.95rem; line-height:1.6;}
+  .fb.ok{background:#e3f6ee; color:#13614a;}
+  .fb.ng{background:#fdeaec; color:#8e2e3a;}
+  .fb .pts-anim{font-weight:800;}
+  .nextbtn{margin-top:14px;}
+  /* result */
+  .bigscore{text-align:center; font-size:2.6rem; font-weight:800; color:var(--accent); margin:4px 0;}
+  .substat{text-align:center; color:var(--sub); font-size:.95rem; margin-bottom:14px;}
+  .badges{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:10px 0 4px;}
+  .badge{
+    background:#fff7e6; border:1.5px solid var(--gold); color:#9a6a10;
+    border-radius:99px; padding:6px 14px; font-size:.85rem; font-weight:700;
+    animation:pop .4s;
+  }
+  @keyframes pop{0%{transform:scale(.4); opacity:0;}100%{transform:scale(1); opacity:1;}}
+  table.lb{width:100%; border-collapse:collapse; font-size:.92rem;}
+  table.lb th{color:var(--sub); font-size:.78rem; text-align:left; padding:6px 8px; border-bottom:1px solid #e3e8f4;}
+  table.lb td{padding:8px; border-bottom:1px solid #eef1f8;}
+  table.lb tr.me{background:#eef1fd; font-weight:700;}
+  .rank1 td:first-child::before{content:"🥇 ";}
+  .rank2 td:first-child::before{content:"🥈 ";}
+  .rank3 td:first-child::before{content:"🥉 ";}
+  h2{font-size:1.05rem; margin:0 0 10px;}
+  .note{font-size:.8rem; color:var(--sub); margin-top:10px;}
+  .formchart{font-size:.9rem; background:#f6f8fd; border-radius:12px; padding:12px 14px; margin-top:12px;}
+  .formchart b{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>使役・使役受身 クイック練習</h1>
+    <p>書きます → 書かせます → 書かされます　全15問・約5分</p>
+  </header>
+
+  <!-- ========== START ========== -->
+  <section id="scr-start">
+    <div class="card">
+      <h2>あそびかた</h2>
+      <p style="font-size:.95rem; margin:0 0 8px;">
+        場面に合う形を選んだり、入力したりします。<br>
+        正解 <b>+10〜20pt</b>、3問連続正解から<b>コンボボーナス</b>！
+      </p>
+      <div class="formchart">
+        <b>使役</b>（させる人が主語）：母は私に野菜を<b>食べさせました</b><br>
+        <b>使役受身</b>（させられる人が主語）：私は母に野菜を<b>食べさせられました</b><br>
+        ※ 五段動詞は短い形もOK：書かせられます ＝ <b>書かされます</b>
+      </div>
+    </div>
+    <div class="card">
+      <label for="player" style="font-weight:700; font-size:.95rem;">なまえ（ニックネームOK）</label>
+      <div style="height:8px"></div>
+      <input type="text" id="player" maxlength="12" placeholder="れい：ノブ">
+      <div style="height:14px"></div>
+      <button class="btn-main" onclick="startGame()">スタート ▶</button>
+      <p class="note" id="namewarn" style="color:var(--ng);" hidden>なまえを入力してください。</p>
+    </div>
+  </section>
+
+  <!-- ========== QUIZ ========== -->
+  <section id="scr-quiz" class="hidden">
+    <div class="statusbar">
+      <span id="qnum">Q1 / 15</span>
+      <span class="streak" id="streak"></span>
+      <span class="pts" id="pts">0 pt</span>
+    </div>
+    <div class="pbar"><div id="pfill"></div></div>
+    <div class="card">
+      <span class="scene" id="scene"></span>
+      <div class="qtext" id="qtext"></div>
+      <div id="answerarea"></div>
+      <div id="feedback"></div>
+    </div>
+  </section>
+
+  <!-- ========== RESULT ========== -->
+  <section id="scr-result" class="hidden">
+    <div class="card">
+      <h2 style="text-align:center;">けっか発表 🎉</h2>
+      <div class="bigscore" id="finalscore"></div>
+      <div class="substat" id="finalstat"></div>
+      <div class="badges" id="badgelist"></div>
+    </div>
+    <div class="card" id="lb-card">
+      <h2>🏆 みんなのランキング Top10</h2>
+      <div id="lb-end"><p class="note">読み込み中…</p></div>
+    </div>
+    <div class="card">
+      <button class="btn-main" onclick="location.reload()">もう一度チャレンジ 🔁</button>
+      <div style="height:10px"></div>
+      <button class="btn-sub" onclick="reviewMistakes()" id="reviewbtn">まちがえた問題を見る 👀</button>
+      <div id="reviewarea"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+"use strict";
+
+/* ================================================================
+   ★ 設定：Google Apps Script のウェブアプリURLをここに貼ってください。
+   空のままでもクイズ自体は動きます（ログ・ランキングなし）。
+   ================================================================ */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbykqq5X6vWKkgAj1_HfuRQM5LVOxHHowYpWh3LaVaWBeXL9TlpCL8_Appo0p7VUkew/exec";
+
+/* ---------------- Questions ---------------- */
+const Q = [
+ // ---- MCQ (10) ----
+ {t:"mcq", scene:"🏠 家で",
+  q:'子どものころ、<ruby>母<rt>はは</rt></ruby>は<ruby>私<rt>わたし</rt></ruby>に<ruby>毎日<rt>まいにち</rt></ruby><ruby>野菜<rt>やさい</rt></ruby>を<span class="blank">＿＿＿</span>。',
+  opts:["食べさせました","食べさせられました","食べられました","食べました"], a:0,
+  ex:"主語が「母」＝させる人 → 使役「食べさせました」。"},
+ {t:"mcq", scene:"🏠 家で",
+  q:'では、「私」を主語にすると…？<br>私は母に毎日野菜を<span class="blank">＿＿＿</span>。',
+  opts:["食べさせられました","食べさせました","食べられました","食べました"], a:0,
+  ex:"主語が「私」＝させられる人 → 使役受身「食べさせられました」。"},
+ {t:"mcq", scene:"🏢 会社で",
+  q:'<ruby>部長<rt>ぶちょう</rt></ruby>は<ruby>新人<rt>しんじん</rt></ruby>に<ruby>資料<rt>しりょう</rt></ruby>を100<ruby>枚<rt>まい</rt></ruby><span class="blank">＿＿＿</span>。',
+  opts:["コピーさせました","コピーさせられました","コピーされました","コピーしました"], a:0,
+  ex:"部長＝させる人が主語 → 使役「コピーさせました」。"},
+ {t:"mcq", scene:"🏢 会社で",
+  q:'新人さん：「私は部長に毎日<ruby>残業<rt>ざんぎょう</rt></ruby>を<span class="blank">＿＿＿</span>んです…」',
+  opts:["させられている","させている","されている","している"], a:0,
+  ex:"「私は部長に」→ させられる側が主語 → 使役受身「させられている」。"},
+ {t:"mcq", scene:"⚽ 部活で",
+  q:'コーチは<ruby>選手<rt>せんしゅ</rt></ruby>にグラウンドを10<ruby>周<rt>しゅう</rt></ruby><span class="blank">＿＿＿</span>。',
+  opts:["走らせました","走らされました","走られました","走りました"], a:0,
+  ex:"コーチ＝させる人が主語 → 使役「走らせました」。"},
+ {t:"mcq", scene:"⚽ 部活で",
+  q:'選手：「きのうも10周も<span class="blank">＿＿＿</span>よ。<ruby>足<rt>あし</rt></ruby>が<ruby>痛<rt>いた</rt></ruby>い…」',
+  opts:["走らされました","走らせました","走られました","走りました"], a:0,
+  ex:"選手＝させられる側 → 使役受身。「走らされました」＝「走らせられました」の短い形。"},
+ {t:"mcq", scene:"🏠 家で",
+  q:'<ruby>妹<rt>いもうと</rt></ruby>が<ruby>泣<rt>な</rt></ruby>いています。母：「だれが妹を<span class="blank">＿＿＿</span>の！」',
+  opts:["泣かせた","泣かされた","泣かれた","泣いた"], a:0,
+  ex:"「だれが＋妹を」→ 使役「泣かせた」。「妹はだれに泣かされたの？」なら使役受身。"},
+ {t:"mcq", scene:"🏫 学校で",
+  q:'<ruby>先生<rt>せんせい</rt></ruby>は<ruby>学生<rt>がくせい</rt></ruby>に<ruby>漢字<rt>かんじ</rt></ruby>を100<ruby>回<rt>かい</rt></ruby><span class="blank">＿＿＿</span>。',
+  opts:["書かせました","書かされました","書かれました","書きました"], a:0,
+  ex:"先生＝させる人が主語 → 使役「書かせました」。"},
+ {t:"mcq", scene:"🏫 学校で",
+  q:'学生：「きのう漢字を100回も<span class="blank">＿＿＿</span>。<ruby>手<rt>て</rt></ruby>が痛いです」',
+  opts:["書かされました","書かせました","書かれました","書きました"], a:0,
+  ex:"学生＝させられる側 → 使役受身「書かされました」（＝書かせられました）。"},
+ {t:"mcq", scene:"☕ 友だちと",
+  q:'<ruby>約束<rt>やくそく</rt></ruby>の<ruby>時間<rt>じかん</rt></ruby>に<ruby>遅<rt>おく</rt></ruby>れて、<ruby>友<rt>とも</rt></ruby>だちを1時間も<span class="blank">＿＿＿</span>しまいました。',
+  opts:["待たせて","待たされて","待って","待たれて"], a:0,
+  ex:"「友だちを」待つ状態にした＝使役「待たせて」。自分が待った側なら「待たされて」。"},
+ // ---- INPUT (5) ----
+ {t:"inp", scene:"🎤 カラオケで",
+  q:'部長に<ruby>苦手<rt>にがて</rt></ruby>な<ruby>歌<rt>うた</rt></ruby>を<span class="blank">＿＿＿</span>。',
+  hint:"歌う → 使役受身・〜ました", ans:["歌わされました","歌わせられました","うたわされました","うたわせられました"],
+  show:"歌わされました（＝歌わせられました）",
+  ex:"歌わ＋される/せられる。どちらの形も正解です。"},
+ {t:"inp", scene:"🏠 家で",
+  q:'母は<ruby>弟<rt>おとうと</rt></ruby>に<ruby>宿題<rt>しゅくだい</rt></ruby>を<span class="blank">＿＿＿</span>。',
+  hint:"する → 使役・〜ました", ans:["させました"],
+  show:"させました",
+  ex:"する → させる（使役）→ させました。"},
+ {t:"inp", scene:"🍻 飲み会で",
+  q:'<ruby>先輩<rt>せんぱい</rt></ruby>にお<ruby>酒<rt>さけ</rt></ruby>をたくさん<span class="blank">＿＿＿</span>。',
+  hint:"飲む → 使役受身・〜ました", ans:["飲まされました","飲ませられました","のまされました","のませられました"],
+  show:"飲まされました（＝飲ませられました）",
+  ex:"飲ま＋される/せられる。短い形「飲まされる」がよく使われます。"},
+ {t:"inp", scene:"🏫 学校で",
+  q:'先生は学生を<ruby>研究室<rt>けんきゅうしつ</rt></ruby>に<span class="blank">＿＿＿</span>。',
+  hint:"来る → 使役・〜ました", ans:["来させました","こさせました"],
+  show:"来させました",
+  ex:"来る → 来させる（こさせる）→ 来させました。"},
+ {t:"inp", scene:"🏪 アルバイトで",
+  q:'<ruby>休<rt>やす</rt></ruby>みの<ruby>日<rt>ひ</rt></ruby>も<ruby>店<rt>みせ</rt></ruby>を<span class="blank">＿＿＿</span>。',
+  hint:"手伝う → 使役受身・〜ました", ans:["手伝わされました","手伝わせられました","てつだわされました","てつだわせられました"],
+  show:"手伝わされました（＝手伝わせられました）",
+  ex:"手伝わ＋される/せられる。"},
+];
+
+/* ---------------- State ---------------- */
+let idx=0, score=0, streak=0, maxStreak=0, correct=0, inpCorrect=0;
+let startTime=0, playerName="", mistakes=[];
+const $=id=>document.getElementById(id);
+
+/* ---------------- API (Google Apps Script) ---------------- */
+function api(data){
+  if(!GAS_URL) return Promise.resolve();
+  return fetch(GAS_URL,{method:"POST",body:JSON.stringify(data)}).catch(()=>{});
+}
+function plain(html){
+  return html.replace(/<rt>[^<]*<\/rt>/g,"").replace(/<br>/g," ").replace(/<[^>]+>/g,"");
+}
+
+/* ---------------- Flow ---------------- */
+function startGame(){
+  playerName=$("player").value.trim().slice(0,12);
+  if(!playerName){
+    $("namewarn").hidden=false;
+    $("player").focus();
+    return;
+  }
+  $("scr-start").classList.add("hidden");
+  $("scr-quiz").classList.remove("hidden");
+  startTime=Date.now();
+  render();
+}
+
+function shuffle(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function render(){
+  const q=Q[idx];
+  $("qnum").textContent=`Q${idx+1} / ${Q.length}`;
+  $("pfill").style.width=(idx/Q.length*100)+"%";
+  $("scene").textContent=q.scene;
+  $("qtext").innerHTML=q.q;
+  $("feedback").innerHTML="";
+  const area=$("answerarea");
+  area.innerHTML="";
+  if(q.t==="mcq"){
+    const order=shuffle(q.opts.map((_,i)=>i));
+    const box=document.createElement("div"); box.className="opts";
+    order.forEach(oi=>{
+      const b=document.createElement("button");
+      b.className="opt"; b.textContent=q.opts[oi];
+      b.onclick=()=>answerMCQ(b,oi===q.a,box);
+      box.appendChild(b);
+    });
+    area.appendChild(box);
+  }else{
+    area.innerHTML=`
+      <div class="hint">ヒント：${q.hint}　<span style="opacity:.7">(ひらがなでもOK)</span></div>
+      <div class="inputrow">
+        <input type="text" id="ans-inp" autocomplete="off" placeholder="ここに入力">
+        <button class="btn-main" id="ans-go">OK</button>
+      </div>`;
+    $("ans-go").onclick=answerINP;
+    $("ans-inp").addEventListener("keydown",e=>{if(e.key==="Enter")answerINP();});
+    setTimeout(()=>$("ans-inp").focus(),100);
+  }
+}
+
+function norm(s){return s.replace(/\s/g,"").replace(/[。．\.]/g,"").trim();}
+
+function answerMCQ(btn,ok,box){
+  box.querySelectorAll("button").forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===Q[idx].opts[Q[idx].a]) b.classList.add("correct");
+  });
+  if(!ok) btn.classList.add("wrong");
+  scoreIt(ok,10,null,btn.textContent);
+}
+
+function answerINP(){
+  const q=Q[idx];
+  const v=norm($("ans-inp").value);
+  if(!v) return;
+  const ok=q.ans.some(a=>norm(a)===v);
+  $("ans-inp").disabled=true; $("ans-go").disabled=true;
+  $("ans-inp").style.borderColor=ok?"var(--ok)":"var(--ng)";
+  if(ok) inpCorrect++;
+  scoreIt(ok,20,q.show,v);
+}
+
+function scoreIt(ok,base,showAns,userAns){
+  const q=Q[idx];
+  let gained=0, bonus=0;
+  if(ok){
+    correct++; streak++; maxStreak=Math.max(maxStreak,streak);
+    gained=base;
+    if(streak>=3){bonus=5; gained+=bonus;}
+    score+=gained;
+  }else{
+    streak=0;
+    mistakes.push(idx);
+  }
+  // 解答ログ送信（失敗しても無視）
+  api({action:"log", name:playerName, qnum:idx+1,
+       type:q.t==="mcq"?"選択":"入力",
+       question:q.scene+" "+plain(q.q),
+       answer:userAns, correct:ok});
+
+  $("pts").textContent=score+" pt";
+  $("streak").textContent=streak>=2?`🔥 ${streak}連続`:"";
+  const fb=document.createElement("div");
+  fb.className="fb "+(ok?"ok":"ng");
+  const ansLine = showAns||q.opts&&q.opts[q.a]||"";
+  fb.innerHTML=(ok
+    ? `⭕ <span class="pts-anim">+${gained}pt${bonus?`（コンボ+${bonus}）`:""}</span><br>`
+    : `❌ 正解：<b>${ansLine}</b><br>`)
+    + q.ex;
+  const nb=document.createElement("button");
+  nb.className="btn-main nextbtn";
+  nb.textContent=idx<Q.length-1?"次の問題 ▶":"けっかを見る 🏁";
+  nb.onclick=()=>{idx++; idx<Q.length?render():finish();};
+  $("feedback").appendChild(fb);
+  $("feedback").appendChild(nb);
+  nb.scrollIntoView({behavior:"smooth",block:"end"});
+}
+
+/* ---------------- Result ---------------- */
+async function finish(){
+  const sec=Math.round((Date.now()-startTime)/1000);
+  $("scr-quiz").classList.add("hidden");
+  $("scr-result").classList.remove("hidden");
+  $("pfill").style.width="100%";
+  $("finalscore").textContent=score+" pt";
+  $("finalstat").textContent=`正解 ${correct} / ${Q.length}　・　タイム ${Math.floor(sec/60)}分${sec%60}秒`;
+
+  // badges
+  const badges=[];
+  badges.push("🌱 はじめの一歩");
+  if(correct===Q.length) badges.push("🏅 パーフェクト");
+  if(maxStreak>=10) badges.push("🔥 コンボ10");
+  else if(maxStreak>=5) badges.push("🔥 コンボ5");
+  if(inpCorrect===5) badges.push("✍️ タイピング名人");
+  if(sec<=240 && correct>=12) badges.push("⚡ スピードスター");
+  $("badgelist").innerHTML=badges.map(b=>`<span class="badge">${b}</span>`).join("");
+  if(mistakes.length===0){$("reviewbtn").classList.add("hidden");}
+
+  // leaderboard
+  if(!GAS_URL){ $("lb-card").classList.add("hidden"); return; }
+  try{
+    await api({action:"score", name:playerName, score:score, correct:correct, time:sec});
+    const r=await fetch(GAS_URL+"?action=top");
+    const j=await r.json();
+    $("lb-end").innerHTML=lbTable(j.top||[]);
+  }catch(e){
+    $("lb-end").innerHTML='<p class="note">ランキングを取得できませんでした。</p>';
+  }
+}
+
+function lbTable(lb){
+  if(!lb.length) return '<p class="note">まだ記録がありません。最初の挑戦者になろう！</p>';
+  let h='<table class="lb"><tr><th>順位</th><th>なまえ</th><th>pt</th><th>正解</th><th>日付</th></tr>';
+  lb.forEach((r,i)=>{
+    const isMe = r.n===playerName && r.s===score;
+    h+=`<tr class="rank${i+1}${isMe?" me":""}"><td>${i+1}</td><td>${esc(r.n)}</td><td>${r.s}</td><td>${r.c}/${Q.length}</td><td>${esc(r.d)}</td></tr>`;
+  });
+  return h+"</table>";
+}
+function esc(s){return String(s).replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]));}
+
+function reviewMistakes(){
+  const area=$("reviewarea");
+  if(area.innerHTML){area.innerHTML="";return;}
+  area.innerHTML=mistakes.map(i=>{
+    const q=Q[i];
+    const ans=q.t==="mcq"?q.opts[q.a]:q.show;
+    return `<div class="formchart" style="margin-top:10px;">
+      <span class="scene">${q.scene}</span><br>${q.q.replace('<span class="blank">＿＿＿</span>',`<b>${ans}</b>`)}
+      <div class="note">${q.ex}</div></div>`;
+  }).join("");
+}
+</script>
+</body>
+</html>

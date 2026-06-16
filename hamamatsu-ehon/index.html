@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>浜松の伝説 - 絵本みたいなHTML版</title>
+  <style>
+    :root {
+      --paper: #fbf3df;
+      --page: #fffaf0;
+      --ink: #3f3026;
+      --muted: #7a6656;
+      --green: #496a50;
+      --line: #d8c8a7;
+      --accent: #b65a4a;
+      --shadow: rgba(64, 48, 38, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 16% 8%, rgba(255, 255, 255, 0.8), transparent 28%),
+        linear-gradient(180deg, #f6ebd1 0%, var(--paper) 48%, #f1e3c3 100%);
+      color: var(--ink);
+      font-family: "Yu Gothic", "Hiragino Sans", "Meiryo", system-ui, sans-serif;
+      line-height: 1.85;
+    }
+
+    header {
+      min-height: 84svh;
+      display: grid;
+      place-items: center;
+      padding: 56px 20px;
+      text-align: center;
+    }
+
+    .cover {
+      width: min(980px, 100%);
+      padding: clamp(42px, 8vw, 92px) 28px;
+      background: rgba(255, 250, 240, 0.78);
+      border: 2px solid var(--line);
+      box-shadow: 0 20px 60px var(--shadow);
+    }
+
+    h1 {
+      margin: 0;
+      font-family: Georgia, "Yu Mincho", serif;
+      font-size: clamp(42px, 9vw, 84px);
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 24px 0 0;
+      font-size: clamp(18px, 3.5vw, 30px);
+      color: var(--green);
+    }
+
+    .cover-meta {
+      margin: 64px 0 0;
+      color: var(--muted);
+      font-size: clamp(15px, 2.7vw, 20px);
+    }
+
+    main {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 0 0 80px;
+    }
+
+    .story {
+      margin: 0 0 90px;
+    }
+
+    .story-heading {
+      margin: 0 0 28px;
+      padding: 0 4px;
+      color: var(--green);
+      font-size: clamp(24px, 4vw, 38px);
+      line-height: 1.35;
+    }
+
+    .spread {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(340px, 0.9fr);
+      gap: 28px;
+      align-items: stretch;
+      margin: 0 0 34px;
+      scroll-margin-top: 24px;
+    }
+
+    .art,
+    .text-page {
+      background: var(--page);
+      border: 2px solid var(--line);
+      box-shadow: 0 14px 38px var(--shadow);
+    }
+
+    .art {
+      padding: 16px;
+    }
+
+    .art img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1 / 1.04;
+      object-fit: cover;
+    }
+
+    .text-page {
+      position: relative;
+      min-height: 560px;
+      padding: clamp(28px, 5vw, 56px);
+    }
+
+    .section-name {
+      margin: 0 0 18px;
+      color: var(--green);
+      font-weight: 700;
+      font-size: clamp(16px, 2vw, 20px);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 46px);
+      line-height: 1.22;
+      letter-spacing: 0;
+    }
+
+    .rule {
+      width: 112px;
+      height: 4px;
+      margin: 26px 0 44px;
+      background: var(--accent);
+    }
+
+    p {
+      margin: 0 0 1.25em;
+      font-size: clamp(19px, 3.5vw, 28px);
+      line-height: 1.95;
+    }
+
+    .page-no {
+      position: absolute;
+      right: 34px;
+      bottom: 26px;
+      color: var(--muted);
+      font-family: Georgia, serif;
+      font-size: 17px;
+    }
+
+    .term {
+      position: relative;
+      display: inline;
+      margin: 0;
+      padding: 0 0.08em;
+      border: 0;
+      border-bottom: 2px dotted rgba(182, 90, 74, 0.72);
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      line-height: inherit;
+      cursor: help;
+    }
+
+    .term::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 10px);
+      z-index: 20;
+      width: max-content;
+      max-width: min(310px, 82vw);
+      transform: translateX(-50%) translateY(6px);
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #2f261f;
+      color: #fff7e8;
+      font-size: 15px;
+      line-height: 1.5;
+      white-space: pre-line;
+      box-shadow: 0 10px 24px rgba(47, 38, 31, 0.28);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 140ms ease, transform 140ms ease;
+    }
+
+    .term::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 2px);
+      z-index: 21;
+      border: 7px solid transparent;
+      border-top-color: #2f261f;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 140ms ease;
+    }
+
+    .term:hover::after,
+    .term:focus-visible::after,
+    .term.is-open::after {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .term:hover::before,
+    .term:focus-visible::before,
+    .term.is-open::before {
+      opacity: 1;
+    }
+
+    footer {
+      width: min(980px, calc(100% - 28px));
+      margin: 0 auto 56px;
+      padding: 28px 4px 0;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 15px;
+      text-align: center;
+    }
+
+    @media (max-width: 820px) {
+      header {
+        min-height: 72svh;
+      }
+
+      main {
+        width: min(100% - 20px, 620px);
+      }
+
+      .story {
+        margin-bottom: 64px;
+      }
+
+      .spread {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 28px;
+      }
+
+      .art {
+        padding: 10px;
+        border-bottom: 0;
+      }
+
+      .art img {
+        aspect-ratio: 1 / 1;
+      }
+
+      .text-page {
+        min-height: auto;
+        padding: 28px 24px 72px;
+      }
+
+      .rule {
+        margin-bottom: 30px;
+      }
+
+      .term::after {
+        position: fixed;
+        left: 16px;
+        right: 16px;
+        bottom: 18px;
+        width: auto;
+        max-width: none;
+        transform: translateY(6px);
+        text-align: left;
+      }
+
+      .term:hover::after,
+      .term:focus-visible::after,
+      .term.is-open::after {
+        transform: translateY(0);
+      }
+
+      .term::before {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="cover">
+      <h1>浜松の伝説</h1>
+      <p class="subtitle">絵本みたいなHTML版</p>
+      <p class="cover-meta">布橋の山桃さま / さいががけの谷</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="story" aria-labelledby="story-one">
+      <h2 class="story-heading" id="story-one">布橋の山桃さま</h2>
+
+      <article class="spread">
+        <figure class="art">
+          <img src="story1_yamamomo_01_arrival.png" alt="犀ヶ崖の近くへ旅のおぼうさんが来る場面">
+        </figure>
+        <section class="text-page">
+          <p class="section-name">布橋の山桃さま</p>
+          <h2>旅のおぼうさん</h2>
+          <div class="rule"></div>
+          <p><button class="term" data-tip="読み: むかし&#10;English: long ago">むかし</button>、旅のおぼうさんが、<button class="term" data-tip="読み: さいががけ&#10;English: Saigagake cliff / valley area">犀ヶ崖</button>の近くに来ました。</p>
+          <p>おぼうさんは、<button class="term" data-tip="読み: びょうき&#10;English: illness, sickness">病気</button>の人をたすける、<button class="term" data-tip="読み: ふしぎ&#10;English: mysterious, wonderous">ふしぎ</button>な力をもっていました。</p>
+          <p>村の人たちは、そっとおぼうさんを見つめました。</p>
+          <span class="page-no">1</span>
+        </section>
+      </article>
+
+      <article class="spread">
+        <figure class="art">
+          <img src="story1_yamamomo_02_healing_prayer.png" alt="おぼうさんが病気の人のために祈る場面">
+        </figure>
+        <section class="text-page">
+          <p class="section-name">布橋の山桃さま</p>
+          <h2>祈りの力</h2>
+          <div class="rule"></div>
+          <p>「なおしてください。」</p>
+          <p>たくさんの人が、おぼうさんのところへ来ました。</p>
+          <p>おぼうさんが<button class="term" data-tip="読み: いのる / いのり&#10;English: to pray / prayer">祈る</button>と、病気の人は少しずつ<button class="term" data-tip="読み: げんき&#10;English: healthy, lively">元気</button>になりました。</p>
+          <span class="page-no">2</span>
+        </section>
+      </article>
+
+      <article class="spread">
+        <figure class="art">
+          <img src="story1_yamamomo_03_promise_sapling.png" alt="おぼうさんが山桃の木を植える約束を話す場面">
+        </figure>
+        <section class="text-page">
+          <p class="section-name">布橋の山桃さま</p>
+          <h2>山桃を植えてください</h2>
+          <div class="rule"></div>
+          <p>ある日、おぼうさんは言いました。</p>
+          <p>「毎年、<button class="term" data-tip="読み: やまもも&#10;English: bayberry tree">山桃</button>の木を<button class="term" data-tip="読み: うえる&#10;English: to plant">植えて</button>ください。」</p>
+          <p>「<button class="term" data-tip="読み: み&#10;English: fruit">実</button>がなる前にお祈りをすれば、病気がなおりますよ。」</p>
+          <span class="page-no">3</span>
+        </section>
+      </article>
+
+      <article class="spread">
+        <figure class="art">
+          <img src="story1_yamamomo_04_guardian_tree.png" alt="村人たちが山桃の木のそばで祈る場面">
+        </figure>
+        <section class="text-page">
+          <p class="section-name">布橋の山桃さま</p>
+          <h2>山桃さま</h2>
+          <div class="rule"></div>
+          <p>おぼうさんは、土の中で<button class="term" data-tip="読み: おきょう&#10;English: Buddhist sutra">お経</button>をとなえつづけました。</p>
+          <p>やがて、おぼうさんは<button class="term" data-tip="読み: なくなる&#10;English: to pass away">亡くなりました</button>。</p>
+          <p>病気がなおった人たちは、おぼうさんを「山桃さま」とよびました。</p>
+          <span class="page-no">4</span>
+        </section>
+      </article>
+
+      <article class="spread">
+        <figure class="art">
+          <img src="story1_yamamomo_05_tree_today.png" alt="大きく育った山桃の木に人びとが祈る場面">
+        </figure>
+        <section class="text-page">
+          <p class="section-name">布橋の山桃さま</p>
+          <h2>今も残る木</h2>
+          <div class="rule"></div>
+          <p>人びとは、竹のつつにお酒を入れて<button class="term" data-tip="読み: おそなえ&#10;English: offering">おそなえ</button>しました。</p>
+          <p>そして、その上に山桃の木を植えました。</p>
+          <p>この木は、今も<button class="term" data-tip="読み: そうえんどう&#10;English: Soendo hall">宗円堂</button>の庭にあるといわれています。</p>
+          <span class="page-no">5</span>
+        </section>
+      </article>
+    </section>
+
+    <section class="story" aria-labelledby="story-two">
+      <h2 class="story-heading" id="story-two">さいががけの谷</h2>
+
+      <article class="spread">
+        <figure class="art">
+          <img src="story2_saigagake_01_strange_sound.png" alt="村人たちが谷から聞こえる不思議な音に気づく場面">
+        </figure>
+        <section class="text-page">
+          <p class="section-name">さいががけの谷</p>
+          <h2>谷からの声</h2>
+          <div class="rule"></div>
+          <p><button class="term" data-tip="読み: いえやす&#10;English: Ieyasu Tokugawa">家康</button>が浜松のお城にいたころのことです。</p>
+          <p><button class="term" data-tip="読み: みかたがはら&#10;English: Mikatagahara">三方ヶ原</button>の戦いのあと、犀ヶ崖の近くでへんな音が聞こえました。</p>
+          <p>それは、<button class="term" data-tip="読み: たに&#10;English: valley">谷</button>の底から聞こえてくるようでした。</p>
+          <span class="page-no">6</span>
+        </section>
+      </article>
+
+      <article class="spread">
+        <figure class="art">
+          <img src="story2_saigagake_02_villagers_decide.png" alt="村人たちが谷の声について相談する場面">
+        </figure>
+        <section class="text-page">
+          <p class="section-name">さいががけの谷</p>
+          <h2>かわいそうな心</h2>
+          <div class="rule"></div>
+          <p>村の人たちは言いました。</p>
+          <p>「ここは、戦いでたくさんの<button class="term" data-tip="読み: へい&#10;English: soldier">兵</button>が亡くなった場所だ。」</p>
+          <p>「まだ<button class="term" data-tip="読み: かなしむ&#10;English: to grieve, to feel sad">悲しんで</button>いるのかもしれない。お祈りをしよう。」</p>
+          <span class="page-no">7</span>
+        </section>
+      </article>
+
+      <article class="spread">
+        <figure class="art">
+          <img src="story2_saigagake_03_soen_prepares.png" alt="宗円が鐘と太鼓を用意して祈る準備をする場面">
+        </figure>
+        <section class="text-page">
+          <p class="section-name">さいががけの谷</p>
+          <h2>宗円の祈り</h2>
+          <div class="rule"></div>
+          <p><button class="term" data-tip="読み: そうえん&#10;English: Soen, a Buddhist priest">宗円</button>というおぼうさんが、谷のそばに立ちました。</p>
+          <p>昼でもくらい谷に、村の人たちも集まりました。</p>
+          <p><button class="term" data-tip="読み: かね&#10;English: bell">鐘</button>と<button class="term" data-tip="読み: たいこ&#10;English: drum">たいこ</button>を用意して、しずかに手を合わせました。</p>
+          <span class="page-no">8</span>
+        </section>
+      </article>
+
+      <article class="spread">
+        <figure class="art">
+          <img src="story2_saigagake_04_memorial_prayer.png" alt="宗円が鐘と太鼓を鳴らして供養する場面">
+        </figure>
+        <section class="text-page">
+          <p class="section-name">さいががけの谷</p>
+          <h2>鐘とたいこ</h2>
+          <div class="rule"></div>
+          <p>宗円は、鐘とたいこを鳴らしながら、お経をとなえました。</p>
+          <p>その音は、谷の底まで<button class="term" data-tip="読み: ひびく&#10;English: to echo, to resonate">ひびいて</button>いきました。</p>
+          <p>すると、へんな声は少しずつ消えていきました。</p>
+          <span class="page-no">9</span>
+        </section>
+      </article>
+
+      <article class="spread">
+        <figure class="art">
+          <img src="story2_saigagake_05_peaceful_valley.png" alt="祈りのあと静かになった谷を人びとが見つめる場面">
+        </figure>
+        <section class="text-page">
+          <p class="section-name">さいががけの谷</p>
+          <h2>静かな谷</h2>
+          <div class="rule"></div>
+          <p>それから、谷から聞こえた声は聞こえなくなりました。</p>
+          <p>人びとは、亡くなった人たちのために祈りつづけました。</p>
+          <p>これが「<button class="term" data-tip="読み: えんしゅうだいねんぶつ&#10;English: Enshu Dainenbutsu memorial Buddhist chanting tradition">遠州大念仏</button>」のはじまりだといわれています。</p>
+          <span class="page-no">10</span>
+        </section>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    元テキスト: 「浜松の伝説_文学作品_やさしい日本語.txt」より、絵本向けに場面ごとに整理。
+  </footer>
+
+  <script>
+    const terms = Array.from(document.querySelectorAll(".term"));
+
+    terms.forEach((term) => {
+      term.type = "button";
+      term.setAttribute("aria-label", `${term.textContent}: ${term.dataset.tip.replace(/\n/g, " / ")}`);
+      term.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const wasOpen = term.classList.contains("is-open");
+        terms.forEach((item) => item.classList.remove("is-open"));
+        if (!wasOpen) term.classList.add("is-open");
+      });
+    });
+
+    document.addEventListener("click", () => {
+      terms.forEach((term) => term.classList.remove("is-open"));
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        terms.forEach((term) => term.classList.remove("is-open"));
+      }
+    });
+  </script>
+</body>
+</html>
